@@ -324,22 +324,8 @@ A: Verify your coordinate system and wall indexing (TOP=0, RIGHT=1, BOTTOM=2, LE
 **Q: Random generation isn't working**
 A: Make sure you're seeding the random number generator properly
 
-## 🎉 Completion Certificate
-
-When you finish this project, you'll have:
-- ✨ Built a complete C++ application from scratch
-- 🧠 Mastered fundamental algorithms and data structures
-- 🏗️ Learned proper software project organization
-- 🔧 Gained experience with build systems and debugging
-- 📊 Understood algorithm analysis and performance
-
-**Congratulations on embarking on this learning journey!** 
-
-Remember: Programming is learned by doing. Don't just read the code - type it, modify it, break it, fix it, and make it your own!
 
 ---
 
 **Happy Coding!** 🚀
-
-*Start with `Maze.h` and work your way through the TODOs. Take your time, understand each concept, and don't hesitate to experiment!*
 
