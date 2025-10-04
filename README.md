@@ -34,7 +34,7 @@ Compilation and Execution
 
 Clone the repository:
 
-git clone [https://github.com/YOUR_USERNAME/cpp-maze-generator.git](https://github.com/YOUR_USERNAME/cpp-maze-generator.git)
+git clone [https://github.com/Ramyprojs/cpp-maze-generator.git](https://github.com/YOUR_USERNAME/cpp-maze-generator.git)
 cd cpp-maze-generator
 
 Compile the project using the included Makefile:
