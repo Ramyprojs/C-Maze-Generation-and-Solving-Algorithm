@@ -34,7 +34,11 @@ Compilation and Execution
 
 Clone the repository:
 
+<<<<<<< HEAD
 git clone [https://github.com/Ramyprojs/cpp-maze-generator.git]
+=======
+git clone [https://github.com/Ramyprojs/cpp-maze-generator.git](https://github.com/YOUR_USERNAME/cpp-maze-generator.git)
+>>>>>>> 53253a2ff3576898dc7bb295b0d39219c7139df1
 cd cpp-maze-generator
 
 Compile the project using the included Makefile:
@@ -59,6 +63,17 @@ Solve Maze: Find the path through the currently generated maze.
 Performance Test: See a speed comparison for generating mazes of different sizes.
 
 Change View: Toggle between detailed Unicode and simple ASCII output.
+<<<<<<< HEAD
+=======
+
+🏗️ Project Structure
+.
+├── Makefile          # Handles all build and run commands
+├── Maze.h            # Header file for the Maze class
+├── Maze.cpp          # Implementation of the Maze class and algorithms
+├── main.cpp          # Main program driver with the user interface
+└── README.md         # This documentation file
+>>>>>>> 53253a2ff3576898dc7bb295b0d39219c7139df1
 
 🏗️ Project Structure
 .
