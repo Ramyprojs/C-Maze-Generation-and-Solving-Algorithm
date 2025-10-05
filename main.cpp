@@ -178,29 +178,21 @@ int main() {
 /**
  * Additional utility functions for demonstration
  */
-namespace MazeUtils {
-    void sizeDemonstration() {
-        // TODO: Construct several mazes of different sizes and print them.
-        std::cout << "\n=== Maze Size Demonstration ===\n";
+namespace MazeUtils {        
+  void sizeDemonstration() {       
+      // TODO: Construct several mazes of different sizes and print them.
+      std::cout << "\n=== SIZE DEMONSTRATION ===\n";
+        std::vector<std::pair<int, int>> sizes = {{5, 5}, {8, 8}, {12, 12}};
         
-        // Create mazes of different sizes
-        Maze smallMaze(5, 5);
-        Maze mediumMaze(10, 10);
-        Maze largeMaze(15, 20);
-        Maze customMaze(8, 12, 12345); // With fixed seed
-        
-        std::cout << "Created mazes with sizes:\n";
-        std::cout << "- Small: 5x5\n";
-        std::cout << "- Medium: 10x10\n";
-        std::cout << "- Large: 15x20\n";
-        std::cout << "- Custom: 8x12 (with seed 12345)\n";
-        
-        // Placeholder for actual maze printing
-        std::cout << "Maze display functionality to be implemented...\n";
+        for (const auto& size : sizes) {
+            Maze demo(size.first, size.second);
+            demo.generateMazeIterative();
+            std::cout << "\nMaze " << size.first << "x" << size.second << ":\n";
+            demo.printMaze();
+        }
     }
-}
+    }
         // Moaz
-    }
 
    void showComplexityInfo() {
     // TODO: Print algorithm complexity information.
