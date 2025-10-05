@@ -14,6 +14,21 @@
 Maze::Maze() : width(10), height(10) {
     // TODO: Initialize a 10x10 grid, set coordinates for each Cell,
     // and initialize RNG (e.g., with a time-based seed).
+    
+    // Initialize RNG with time-based seed
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    randomGenerator = std::default_random_engine(seed);
+    
+    // Initialize 10x10 grid
+    grid.resize(height, std::vector<Cell>(width));
+    
+    // Set coordinates for each cell
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            grid[y][x].setCoordinates(x, y);
+        }
+    }
+}
         // Moaz
 }
 
