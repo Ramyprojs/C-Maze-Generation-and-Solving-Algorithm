@@ -121,49 +121,57 @@ int main() {
         
         switch (choice) {
             case 1:
-                // Generate random maze
-                std::cout << "Generating random maze...\n";
+                currentMaze = Maze(10, 10);
+                generateBasicMaze(currentMaze, false);
                 break;
+                
             case 2:
-                // Generate maze with seed
-                {
-                    unsigned int seed = getIntInput("Enter seed value: ", 0, 1000000);
-                    std::cout << "Generating maze with seed " << seed << "...\n";
-                }
+                currentMaze = Maze(10, 10);
+                generateBasicMaze(currentMaze, true);
                 break;
+                
             case 3:
-                // Set dimensions
-                {
-                    int width = getIntInput("Enter width: ", 5, 50);
-                    int height = getIntInput("Enter height: ", 5, 50);
-                    std::cout << "Setting dimensions to " << width << "x" << height << "...\n";
-                }
+                generateCustomMaze(currentMaze);
                 break;
+                
             case 4:
-                // Display maze
-                std::cout << "Displaying current maze...\n";
+                generateSeededMaze(currentMaze);
                 break;
+                
             case 5:
-                // Solve maze
-                std::cout << "Solving maze...\n";
+                std::cout << "\nASCII representation of current maze:\n";
+                currentMaze.printMazeASCII();
                 break;
+                
             case 6:
-                // Save maze
-                std::cout << "Saving maze to file...\n";
+                currentMaze.printMazeDetailed();
                 break;
+                
             case 7:
-                // Load maze
-                std::cout << "Loading maze from file...\n";
+                solveMazeDemo(currentMaze);
                 break;
+                
             case 8:
-                std::cout << "Exiting...\n";
+                compareMazes();
                 break;
+                
+            case 9:
+                performanceTest();
+                break;
+                
+            case 10:
+                std::cout << "\nChecking maze connectivity...\n";
+                currentMaze.isMazeConnected();
+                break;
+                
+            case 0:
+                std::cout << "\nThank you for using the Recursive Maze Generator!\n";
+                std::cout << "Goodbye!\n";
+                break;
+                
             default:
-                std::cout << "Invalid choice!\n";
+                std::cout << "Invalid option. Please try again.\n";
         }
-    } while (choice != 8);
-    
-    return 0;
 }  //Moaz
 }
 
