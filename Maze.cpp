@@ -54,7 +54,17 @@ Maze::Maze(int w, int h) : width(w), height(h) {
 
 Maze::Maze(int w, int h, unsigned int seed) : width(w), height(h), rng(seed) {
     // TODO: Resize grid and initialize RNG with provided seed.
-    (void)w; (void)h; (void)seed;
+    
+    // Resize grid to specified dimensions
+    grid.resize(height, std::vector<Cell>(width));
+    
+    // Set coordinates for each cell
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            grid[y][x].setCoordinates(x, y);
+        }
+    }
+}
     // Moaz
 }
 
