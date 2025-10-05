@@ -109,9 +109,60 @@ int main() {
     // TODO: Implement full interactive loop. This skeleton just demonstrates
     // how the real main is structured. Replace with real logic when
     // implementing tests.
-    std::cout << "test_maze skeleton main (no-op).\n";
-    // Moaz
+    
+    Maze maze;
+    int choice;
+    
+    do {
+        displayMenu();
+        choice = getIntInput("", 1, 8);
+        
+        switch (choice) {
+            case 1:
+                // Generate random maze
+                std::cout << "Generating random maze...\n";
+                break;
+            case 2:
+                // Generate maze with seed
+                {
+                    unsigned int seed = getIntInput("Enter seed value: ", 0, 1000000);
+                    std::cout << "Generating maze with seed " << seed << "...\n";
+                }
+                break;
+            case 3:
+                // Set dimensions
+                {
+                    int width = getIntInput("Enter width: ", 5, 50);
+                    int height = getIntInput("Enter height: ", 5, 50);
+                    std::cout << "Setting dimensions to " << width << "x" << height << "...\n";
+                }
+                break;
+            case 4:
+                // Display maze
+                std::cout << "Displaying current maze...\n";
+                break;
+            case 5:
+                // Solve maze
+                std::cout << "Solving maze...\n";
+                break;
+            case 6:
+                // Save maze
+                std::cout << "Saving maze to file...\n";
+                break;
+            case 7:
+                // Load maze
+                std::cout << "Loading maze from file...\n";
+                break;
+            case 8:
+                std::cout << "Exiting...\n";
+                break;
+            default:
+                std::cout << "Invalid choice!\n";
+        }
+    } while (choice != 8);
+    
     return 0;
+}  //Moaz
 }
 
 /**
