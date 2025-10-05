@@ -9,6 +9,17 @@
  */
 void displayMenu() {
     // TODO: Print the menu options to stdout (copy from the real project)
+    std::cout << "\n=== Maze Generator ===\n";
+    std::cout << "1. Generate Random Maze\n";
+    std::cout << "2. Generate Maze with Specific Seed\n";
+    std::cout << "3. Set Maze Dimensions\n";
+    std::cout << "4. Display Current Maze\n";
+    std::cout << "5. Solve Maze\n";
+    std::cout << "6. Save Maze to File\n";
+    std::cout << "7. Load Maze from File\n";
+    std::cout << "8. Exit\n";
+    std::cout << "Enter your choice (1-8): ";
+}
     // Moaz
 }
 
