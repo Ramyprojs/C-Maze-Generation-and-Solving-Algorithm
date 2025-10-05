@@ -26,31 +26,28 @@ void displayMenu() {
     std::cout << "Choose an option: ";
 }
     // Moaz
-}
-
+    
 /**
  * Get integer input with validation
  */
-int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {
+int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {  
     // TODO: Prompt the user and validate numeric input between min and max.
     int value;
     while (true) {
         std::cout << prompt;
-        if (std::cin >> value) {
-            if (value >= min && value <= max) {
-                break;
-            } else {
-                std::cout << "Please enter a value between " << min << " and " << max << ".\n";
-            }
+        if (std::cin >> value && value >= min && value <= max) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return value;
         } else {
-            std::cout << "Invalid input. Please enter a valid number.\n";
+            std::cout << "Invalid input. Please enter a number between " 
+                      << min << " and " << max << ".\n";
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
-    return value;
-} //Moaaz
 }
+ //Moaaz
+
 
 /**
  * Generate and display a basic maze
