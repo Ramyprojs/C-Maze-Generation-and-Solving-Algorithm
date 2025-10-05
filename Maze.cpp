@@ -25,21 +25,19 @@ Maze::Maze() : width(10), height(10), rng(std::chrono::steady_clock::now().time_
 }
         // Moaz
 }
-
-Maze::Maze(int w, int h) : width(w), height(h) {
-    // TODO: Resize grid to [height][width], set coordinates for each Cell,
-    // and initialize RNG with a default seed.
-    
-    // Initialize RNG with default seed
-    randomGenerator = std::default_random_engine();
-    
-    // Resize grid to specified dimensions
+ /**
+ * Constructor with custom dimensions
+ */
+Maze::Maze(int w, int h) : width(w), height(h), rng(std::chrono::steady_clock::now().time_since_epoch().count()) {
     grid.resize(height, std::vector<Cell>(width));
     
-    // Set coordinates for each cell
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            grid[y][x].setCoordinates(x, y);
+     // TODO: Resize grid to [height][width], set coordinates for each Cell,
+    // and initialize RNG with a default seed.
+    // Initialize grid with coordinates
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            grid[y][x] = Cell(x, y);
         }
     }
 }
