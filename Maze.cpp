@@ -35,7 +35,20 @@ Maze::Maze() : width(10), height(10) {
 Maze::Maze(int w, int h) : width(w), height(h) {
     // TODO: Resize grid to [height][width], set coordinates for each Cell,
     // and initialize RNG with a default seed.
-    (void)w; (void)h;
+    
+    // Initialize RNG with default seed
+    randomGenerator = std::default_random_engine();
+    
+    // Resize grid to specified dimensions
+    grid.resize(height, std::vector<Cell>(width));
+    
+    // Set coordinates for each cell
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            grid[y][x].setCoordinates(x, y);
+        }
+    }
+}
     // Moaz
 }
 
