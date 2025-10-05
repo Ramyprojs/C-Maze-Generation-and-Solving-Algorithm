@@ -8,17 +8,22 @@
  * Display the main menu
  */
 void displayMenu() {
-    // TODO: Print the menu options to stdout (copy from the real project)
-    std::cout << "\n=== Maze Generator ===\n";
-    std::cout << "1. Generate Random Maze\n";
-    std::cout << "2. Generate Maze with Specific Seed\n";
-    std::cout << "3. Set Maze Dimensions\n";
-    std::cout << "4. Display Current Maze\n";
-    std::cout << "5. Solve Maze\n";
-    std::cout << "6. Save Maze to File\n";
-    std::cout << "7. Load Maze from File\n";
-    std::cout << "8. Exit\n";
-    std::cout << "Enter your choice (1-8): ";
+    std::cout << "\n" << std::string(50, '=') << "\n";
+    std::cout << "        RECURSIVE MAZE GENERATOR\n";
+    std::cout << std::string(50, '=') << "\n";
+    std::cout << "1. Generate maze (Iterative - Stack-based)\n";
+    std::cout << "2. Generate maze (Recursive)\n";
+    std::cout << "3. Generate custom size maze\n";
+    std::cout << "4. Generate maze with custom seed\n";
+    std::cout << "5. Show maze in ASCII format\n";
+    std::cout << "6. Show detailed maze information\n";
+    std::cout << "7. Solve current maze\n";
+    std::cout << "8. Generate multiple mazes comparison\n";
+    std::cout << "9. Performance test\n";
+    std::cout << "A. Check maze connectivity (debug)\n";
+    std::cout << "0. Exit\n";
+    std::cout << std::string(50, '=') << "\n";
+    std::cout << "Choose an option: ";
 }
     // Moaz
 }
