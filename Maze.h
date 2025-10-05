@@ -55,9 +55,11 @@ private:
 
 public:
     // Constructors
-    Maze(); // Moaz
+    Maze();
+    Maze(int width, int height);
+    Maze(int width, int height, unsigned int seed); // Moaz
     Maze(int w, int h); // Youssef
-    Maze(int w, int h, unsigned int seed); // Moaz
+   Maze(int w, int h, unsigned int seed); // Moaz
 
     // Core functionality
     void generateMaze();
