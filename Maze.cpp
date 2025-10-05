@@ -24,7 +24,7 @@ Maze::Maze() : width(10), height(10), rng(std::chrono::steady_clock::now().time_
     }
 }
         // Moaz
-}
+
  /**
  * Constructor with custom dimensions
  */
@@ -42,23 +42,23 @@ Maze::Maze(int w, int h) : width(w), height(h), rng(std::chrono::steady_clock::n
     }
 }
     // Moaz
-}
-
+   
+/**
+ * Constructor with custom dimensions and seed
+ */
 Maze::Maze(int w, int h, unsigned int seed) : width(w), height(h), rng(seed) {
-    // TODO: Resize grid and initialize RNG with provided seed.
-    
-    // Resize grid to specified dimensions
     grid.resize(height, std::vector<Cell>(width));
-    
-    // Set coordinates for each cell
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            grid[y][x].setCoordinates(x, y);
+        // TODO: Resize grid and initialize RNG with provided seed.
+
+    // Initialize grid with coordinates
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            grid[y][x] = Cell(x, y);
         }
     }
 }
     // Moaz
-}
+
 
 // Helper methods
 Cell* Maze::getCell(int x, int y) {
