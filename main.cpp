@@ -192,8 +192,29 @@ namespace MazeUtils {
         // Moaz
     }
 
-    void showComplexityInfo() {
-        // TODO: Print algorithm complexity information.
+   void showComplexityInfo() {
+    // TODO: Print algorithm complexity information.
+    std::cout << "\n=== Maze Generation Algorithm Complexities ===\n";
+    std::cout << "1. Depth-First Search (DFS):\n";
+    std::cout << "   - Time: O(n) where n is number of cells\n";
+    std::cout << "   - Space: O(n) for recursion stack\n";
+    std::cout << "   - Characteristics: Creates long corridors, few dead ends\n\n";
+    
+    std::cout << "2. Prim's Algorithm:\n";
+    std::cout << "   - Time: O(n log n) with binary heap\n";
+    std::cout << "   - Space: O(n) for priority queue\n";
+    std::cout << "   - Characteristics: More uniform, many short dead ends\n\n";
+    
+    std::cout << "3. Kruskal's Algorithm:\n";
+    std::cout << "   - Time: O(n log n) with union-find\n";
+    std::cout << "   - Space: O(n) for disjoint set\n";
+    std::cout << "   - Characteristics: Balanced, medium difficulty\n\n";
+    
+    std::cout << "4. Recursive Division:\n";
+    std::cout << "   - Time: O(n log n)\n";
+    std::cout << "   - Space: O(log n) for recursion\n";
+    std::cout << "   - Characteristics: Perfect maze, rectangular patterns\n";
+}
         // Moaz
     }
 }
