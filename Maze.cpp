@@ -67,10 +67,35 @@ void Maze::generateMaze() {
 }
 
 void Maze::generateMazeIterative() {
-    // TODO: Implement stack-based DFS generation:
-    // - reset maze
-    // - start at (0,0), mark visited
-    // - while stack not empty: pick unvisited neighbor, remove wall, push, else pop
+    resetMaze();
+    
+    // Start from top-left corner
+    Cell* currentCell = getCell(0, 0);
+    currentCell->visited = true;
+    cellStack.push(currentCell);
+    
+    while (!cellStack.empty()) {
+        currentCell = cellStack.top();
+        
+        // Get unvisited neighbors
+        std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+        
+        if (!neighbors.empty()) {
+            // Choose random neighbor
+            std::uniform_int_distribution<int> dist(0, neighbors.size() - 1);
+            Cell* chosenNeighbor = neighbors[dist(rng)];
+            
+            // Remove wall between current and chosen neighbor
+            removeWall(currentCell, chosenNeighbor);
+            
+            // Mark chosen neighbor as visited and push to stack
+            chosenNeighbor->visited = true;
+            cellStack.push(chosenNeighbor);
+        } else {
+            // Backtrack - pop from stack
+            cellStack.pop();
+        }
+    }
         // Ramy
 }
 
