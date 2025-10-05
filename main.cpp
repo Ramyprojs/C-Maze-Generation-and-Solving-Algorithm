@@ -28,10 +28,23 @@ void displayMenu() {
  */
 int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {
     // TODO: Prompt the user and validate numeric input between min and max.
-    // Placeholder: return min as a safe default for compilation and tests.
-    (void)prompt; (void)min; (void)max;
-    // Moaz
-    return min;
+    int value;
+    while (true) {
+        std::cout << prompt;
+        if (std::cin >> value) {
+            if (value >= min && value <= max) {
+                break;
+            } else {
+                std::cout << "Please enter a value between " << min << " and " << max << ".\n";
+            }
+        } else {
+            std::cout << "Invalid input. Please enter a valid number.\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+    return value;
+} //Moaaz
 }
 
 /**
