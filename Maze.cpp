@@ -272,13 +272,91 @@ void Maze::resetMaze() {
 
 // Solver
 bool Maze::solveMaze(int startX, int startY, int endX, int endY) {
-    // TODO: Implement solver (BFS recommended) that finds a path from
-    // (startX,startY) to (endX,endY). Use local visited/parent arrays
-    // so you don't clash with generation's visited flags. Return true
-    // if a solution is found.
-    (void)startX; (void)startY; (void)endX; (void)endY;
-           // Youssef
-    return false;
+    // Defensive checks
+    if (width <= 0 || height <= 0) return false;
+    if (startX < 0 || startX >= width || startY < 0 || startY >= height) return false;
+    if (endX < 0 || endX >= width || endY < 0 || endY >= height) return false;
+
+    // Direction vectors: TOP, RIGHT, BOTTOM, LEFT
+    const int dx[4] = {0, 1, 0, -1};
+    const int dy[4] = {-1, 0, 1, 0};
+
+    // Local visited grid
+    std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
+
+    // Parent map for backtracking path (stores previous cell)
+    std::vector<std::vector<std::pair<int, int>>> parent(height, std::vector<std::pair<int, int>>(width, {-1, -1}));
+
+    // BFS queue
+    std::queue<std::pair<int, int>> q;
+    q.push({startX, startY});
+    visited[startY][startX] = true;
+
+    bool found = false;
+
+    while (!q.empty()) {
+        auto [x, y] = q.front();
+        q.pop();
+
+        // Check if we've reached the goal
+        if (x == endX && y == endY) {
+            found = true;
+            break;
+        }
+
+        // Explore neighbors
+        for (int dir = 0; dir < 4; ++dir) {
+            int nx = x + dx[dir];
+            int ny = y + dy[dir];
+
+            // Skip out-of-bounds
+            if (nx < 0 || nx >= width || ny < 0 || ny >= height)
+                continue;
+
+            // Skip if there's a wall between (x,y) and (nx,ny)
+            if (grid[y][x].walls[dir]) continue; // Wall in current cell
+
+            // Also check the opposite wall in neighbor for safety
+            int opposite = (dir + 2) % 4;
+            if (grid[ny][nx].walls[opposite]) continue;
+
+            // Visit unvisited cells
+            if (!visited[ny][nx]) {
+                visited[ny][nx] = true;
+                parent[ny][nx] = {x, y};
+                q.push({nx, ny});
+            }
+        }
+    }
+
+    if (!found) {
+        std::cout << "No path found between start and end.\n";
+        return false;
+    }
+
+    // Backtrack the path from end to start
+    std::vector<std::pair<int, int>> path;
+    for (int cx = endX, cy = endY; cx != -1 && cy != -1; ) {
+        path.push_back({cx, cy});
+        auto [px, py] = parent[cy][cx];
+        cx = px;
+        cy = py;
+    }
+
+    std::reverse(path.begin(), path.end());
+
+    // Optional: Print or mark the path
+    std::cout << "Path found! (" << path.size() << " steps)\n";
+    for (auto &[x, y] : path) {
+        std::cout << "(" << x << "," << y << ") ";
+        // You could mark the path in grid[y][x], e.g.:
+        // grid[y][x].onPath = true; // if Cell has such a field
+    }
+    std::cout << "\n";
+
+    return true;
+
+    //Youssef
 }
 
 void Maze::printSolution() const {
