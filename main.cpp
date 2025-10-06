@@ -71,11 +71,24 @@ void generateCustomMaze(Maze &currentMaze) {
  * Generate maze with custom seed (now updates a passed-in currentMaze)
  */
 void generateSeededMaze(Maze &currentMaze) {
-    // TODO: Ask user for width/height/seed, create Maze(w,h,seed),
-    // generate it, and assign to currentMaze.
-    (void)currentMaze;
-    // Ramy
-}
+    int width = getIntInput("Enter maze width (3-30): ", 3, 30);
+    int height = getIntInput("Enter maze height (3-30): ", 3, 30);
+    unsigned int seed = getIntInput("Enter seed value: ", 0, 999999);
+
+    Maze seededMaze(width, height, seed);
+
+    std::cout << "\nChoose algorithm:\n";
+    std::cout << "1. Iterative (Stack-based)\n";
+    std::cout << "2. Recursive\n";
+    int choice = getIntInput("Choice (1-2): ", 1, 2);
+
+    std::cout << "\nUsing seed: " << seed << "\n";
+    generateBasicMaze(seededMaze, choice == 2);
+
+    // Make the seeded maze the current maze for subsequent operations
+    currentMaze = std::move(seededMaze);
+} //Ramy
+
 
 /**
  * Compare multiple maze generation algorithms
