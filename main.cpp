@@ -50,11 +50,22 @@ void generateBasicMaze(Maze& maze, bool useRecursive = false) {
  * Generate maze with custom dimensions (now updates a passed-in currentMaze)
  */
 void generateCustomMaze(Maze &currentMaze) {
-    // TODO: Ask user for width & height, construct a Maze, generate it,
-    // and assign it into currentMaze so the rest of the program uses it.
-    (void)currentMaze;
-    // Ramy
-}
+    int width = getIntInput("Enter maze width (3-50): ", 3, 50);
+    int height = getIntInput("Enter maze height (3-50): ", 3, 50);
+
+    Maze customMaze(width, height);
+
+    std::cout << "\nChoose algorithm:\n";
+    std::cout << "1. Iterative (Stack-based)\n";
+    std::cout << "2. Recursive\n";
+    int choice = getIntInput("Choice (1-2): ", 1, 2);
+
+    generateBasicMaze(customMaze, choice == 2);
+
+    // Replace the currentMaze with the newly generated maze so option 7
+    // (solve current maze) operates on the maze the user just created.
+    currentMaze = std::move(customMaze);
+}  //Ramy
 
 /**
  * Generate maze with custom seed (now updates a passed-in currentMaze)
