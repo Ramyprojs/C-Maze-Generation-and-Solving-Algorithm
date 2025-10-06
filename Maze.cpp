@@ -83,17 +83,16 @@ void Maze::removeWall(Cell* current, Cell* neighbor) {
 }  //Ramy
 
 Direction Maze::getDirection(Cell* from, Cell* to) {
-    // TODO: Compare coordinates and return TOP/RIGHT/BOTTOM/LEFT.
-    (void)from; (void)to;
-           // Ramy
-    return TOP;
-}
+    if (to->y < from->y) return TOP;
+    if (to->x > from->x) return RIGHT;
+    if (to->y > from->y) return BOTTOM;
+    return LEFT;
+} //Ramy
 
 // Core functionality
 void Maze::generateMaze() {
-    // TODO: Default to iterative generation (call generateMazeIterative()).
-        // Ramy
-}
+    generateMazeIterative();
+} //Ramy
 
 void Maze::generateMazeIterative() {
     resetMaze();
