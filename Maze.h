@@ -13,7 +13,8 @@
 struct Cell {
     bool visited;           // Has this cell been visited during generation?
     bool walls[4];          // Walls: 0=top, 1=right, 2=bottom, 3=left
-    int x, y;               // Coordinates
+    int x, y;
+    bool onPath = false;// Coordinates
 
     Cell() : visited(false), x(0), y(0) {
         // TODO: Initialize all walls as present (caller should implement)

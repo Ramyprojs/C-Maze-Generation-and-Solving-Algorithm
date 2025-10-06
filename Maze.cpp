@@ -1,6 +1,8 @@
 #include "Maze.h"
 #include <algorithm>
 #include <chrono>
+#include <queue>
+
 
 /**
  * test_maze/Maze.cpp
@@ -452,8 +454,67 @@ void Maze::printSolution() const {
 
 // Debug and validation
 bool Maze::isMazeConnected() {
-    // TODO: Use DFS/BFS from (0,0) to count reachable cells and
-    // compare against width*height; return true if equal.
-    return false;
-    // Youssef
+    // Defensive checks
+    if (width <= 0 || height <= 0 || grid.empty()) {
+        std::cout << "Invalid maze dimensions or uninitialized grid.\n";
+        return false;
+    }
+
+    // Total number of cells expected to be reachable
+    const int totalCells = width * height;
+
+    // Local visited tracker (don’t use Cell.visited so it doesn’t interfere with other algorithms)
+    std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
+
+    // Directions: TOP, RIGHT, BOTTOM, LEFT
+    const int dx[4] = {0, 1, 0, -1};
+    const int dy[4] = {-1, 0, 1, 0};
+
+    // Start BFS from (0,0)
+    std::queue<std::pair<int, int>> q;
+    q.push({0, 0});
+    visited[0][0] = true;
+    int reachableCount = 1;
+
+    while (!q.empty()) {
+        auto [x, y] = q.front();
+        q.pop();
+
+        // Explore 4 neighbors
+        for (int dir = 0; dir < 4; ++dir) {
+            int nx = x + dx[dir];
+            int ny = y + dy[dir];
+
+            // Skip out-of-bounds
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height)
+                continue;
+
+            // Skip if wall blocks movement in that direction
+            if (grid[y][x].walls[dir])
+                continue;
+
+            // Skip already visited
+            if (visited[ny][nx])
+                continue;
+
+            // Otherwise, mark and push
+            visited[ny][nx] = true;
+            q.push({nx, ny});
+            ++reachableCount;
+        }
+    }
+
+    // Maze is connected if we reached every cell
+    bool connected = (reachableCount == totalCells);
+
+    // Optional: print debug info
+    std::cout << "Reachable cells: " << reachableCount
+              << " / " << totalCells
+              << " -> Maze " << (connected ? "is connected ✅" : "has disconnected regions ❌")
+              << "\n";
+
+    return connected;
+
+    //Youssef
 }
+
