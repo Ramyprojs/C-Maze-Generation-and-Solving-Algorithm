@@ -360,9 +360,95 @@ bool Maze::solveMaze(int startX, int startY, int endX, int endY) {
 }
 
 void Maze::printSolution() const {
-    // TODO: Visualize the solution path on top of the maze output.
-    // Youssef
+    // Defensive checks to avoid undefined behavior
+    if (width <= 0 || height <= 0 || grid.empty()) {
+        std::cout << "Invalid maze dimensions or uninitialized grid.\n";
+        return;
+    }
+
+    // Decide whether to use Unicode or ASCII based on user’s terminal
+    // (for now, we default to ASCII, but you can toggle this flag if desired)
+    bool useUnicode = true;
+
+    // Characters used for drawing
+    const char wallASCII = '#';
+    const char pathChar  = '.';   // Path marker
+    const char spaceChar = ' ';   // Empty floor space
+
+    // For Unicode walls
+    const std::string hWall = "──";
+    const std::string vWall = "│";
+
+    // Create a drawing canvas sized for ASCII layout:
+    // Each logical cell maps to (2*y+1, 2*x+1)
+    const int rows = height * 2 + 1;
+    const int cols = width * 2 + 1;
+    std::vector<std::string> canvas(rows, std::string(cols, wallASCII));
+
+    // Helper to set a safe character in the canvas
+    auto setCanvas = [&](int r, int c, char ch) {
+        if (r >= 0 && r < rows && c >= 0 && c < cols)
+            canvas[r][c] = ch;
+    };
+
+    // Draw all cells and mark passages + solution path
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const Cell &cell = grid[y][x];
+            int cr = 2 * y + 1; // canvas row
+            int cc = 2 * x + 1; // canvas column
+
+            // Mark the cell interior:
+            // If it’s part of the solution, show a path marker '.'
+            setCanvas(cr, cc, cell.onPath ? pathChar : spaceChar);
+
+            // Open passages in each direction (if no wall)
+            if (!cell.walls[TOP])
+                setCanvas(cr - 1, cc, cell.onPath ? pathChar : spaceChar);
+            if (!cell.walls[BOTTOM])
+                setCanvas(cr + 1, cc, cell.onPath ? pathChar : spaceChar);
+            if (!cell.walls[LEFT])
+                setCanvas(cr, cc - 1, cell.onPath ? pathChar : spaceChar);
+            if (!cell.walls[RIGHT])
+                setCanvas(cr, cc + 1, cell.onPath ? pathChar : spaceChar);
+        }
+    }
+
+    // Create entrance and exit openings (optional)
+    setCanvas(0, 1, spaceChar);
+    setCanvas(rows - 1, cols - 2, spaceChar);
+
+    // Header
+    std::cout << "\n=== MAZE SOLUTION (" << width << "x" << height << ") ===\n";
+
+    // Print either Unicode or ASCII walls
+    if (useUnicode) {
+        // Replace '#' characters with Unicode wall symbols for a cleaner look
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                char ch = canvas[r][c];
+                if (ch == wallASCII) {
+                    // Simple replacement logic (for aesthetic walls)
+                    if (r % 2 == 0 && c % 2 == 0) std::cout << "┼";
+                    else if (r % 2 == 0) std::cout << "─";
+                    else if (c % 2 == 0) std::cout << "│";
+                    else std::cout << " ";
+                } else {
+                    std::cout << ch;
+                }
+            }
+            std::cout << '\n';
+        }
+    } else {
+        // ASCII fallback — draw the grid as-is
+        for (const auto &line : canvas)
+            std::cout << line << '\n';
+    }
+
+    //Youssef
 }
+
+
 
 // Debug and validation
 bool Maze::isMazeConnected() {
