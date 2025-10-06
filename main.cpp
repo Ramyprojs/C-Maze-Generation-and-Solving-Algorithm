@@ -117,9 +117,36 @@ void compareMazes() {
  * Performance testing
  */
 void performanceTest() {
-    // TODO: Benchmark generateMazeIterative() and generateMazeRecursive().
-    // Ramy
-}
+    std::cout << "\nPerformance Test - Maze Generation Times\n";
+    std::cout << std::string(45, '-') << "\n";
+    
+    std::vector<std::pair<int, int>> sizes = {{10, 10}, {20, 20}, {30, 30}, {40, 40}};
+    
+    for (const auto& size : sizes) {
+        int width = size.first;
+        int height = size.second;
+        
+        std::cout << "Testing " << width << "x" << height << " maze:\n";
+        
+        // Test iterative algorithm
+        Maze iterativeMaze(width, height);
+        auto start = std::chrono::high_resolution_clock::now();
+        iterativeMaze.generateMazeIterative();
+        auto end = std::chrono::high_resolution_clock::now();
+        auto iterativeTime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        
+        // Test recursive algorithm
+        Maze recursiveMaze(width, height);
+        start = std::chrono::high_resolution_clock::now();
+        recursiveMaze.generateMazeRecursive();
+        end = std::chrono::high_resolution_clock::now();
+        auto recursiveTime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        
+        std::cout << "  Iterative: " << std::setw(8) << iterativeTime.count() << " μs\n";
+        std::cout << "  Recursive: " << std::setw(8) << recursiveTime.count() << " μs\n";
+        std::cout << "  Difference: " << std::setw(7) << (recursiveTime.count() - iterativeTime.count()) << " μs\n\n";
+    }
+}  //Ramy
 
 /**
  * Demonstrate maze solving
