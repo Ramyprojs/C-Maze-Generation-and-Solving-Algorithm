@@ -89,7 +89,81 @@ void Maze::printMaze() const {
 }
 
 void Maze::printMazeASCII() const {
-    // TODO: Print a compact ASCII representation where walls are '#'.
+    // Defensive validation: ensure dimensions look sane
+    if (width <= 0 || height <= 0) {
+        std::cout << "Invalid maze dimensions (width/height <= 0).\n";
+        return;
+    }
+
+    // If grid is not initialized to the expected size, avoid UB and print a warning
+    if (static_cast<int>(grid.size()) != height) {
+        std::cout << "Maze grid not initialized or size mismatch.\n";
+        return;
+    }
+    for (const auto &row : grid) {
+        if (static_cast<int>(row.size()) != width) {
+            std::cout << "Maze grid row size mismatch.\n";
+            return;
+        }
+    }
+
+    // Canvas dimensions: we use a compact representation where each cell
+    // maps to coordinates (2*y+1, 2*x+1) and walls occupy the other positions.
+    const int rows = height * 2 + 1;
+    const int cols = width * 2 + 1;
+
+    // Create canvas filled entirely with wall characters '#'
+    std::vector<std::string> canvas(rows, std::string(cols, '#'));
+
+    // Helper to safely set a character in the canvas
+    auto setCanvas = [&](int r, int c, char ch) {
+        if (r >= 0 && r < rows && c >= 0 && c < cols) canvas[r][c] = ch;
+    };
+
+    // Iterate each logical cell and carve out the cell interior and any
+    // openings where walls are absent. We interpret Cell.walls[] as:
+    // walls[TOP]==true means a wall exists on the top side, false means an opening.
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const Cell &cell = grid[y][x];
+            int cr = 2 * y + 1; // canvas row
+            int cc = 2 * x + 1; // canvas col
+
+            // Mark the cell interior as an open space
+            setCanvas(cr, cc, ' ');
+
+            // If there's no top wall, open a passage above the cell
+            if (cell.walls[TOP] == false) {
+                setCanvas(cr - 1, cc, ' ');
+            }
+
+            // If there's no bottom wall, open a passage below the cell
+            if (cell.walls[BOTTOM] == false) {
+                setCanvas(cr + 1, cc, ' ');
+            }
+
+            // If there's no left wall, open a passage to the left
+            if (cell.walls[LEFT] == false) {
+                setCanvas(cr, cc - 1, ' ');
+            }
+
+            // If there's no right wall, open a passage to the right
+            if (cell.walls[RIGHT] == false) {
+                setCanvas(cr, cc + 1, ' ');
+            }
+        }
+    }
+
+    // Optionally open a conventional entrance and exit so the maze is usable
+    // Entrance: top row just above cell (0,0) at (0,1). Exit: bottom row
+    // just below cell (height-1,width-1) at (rows-1, cols-2).
+    setCanvas(0, 1, ' ');
+    setCanvas(rows - 1, cols - 2, ' ');
+
+    // Print the canvas line by line
+    for (const auto &line : canvas) {
+        std::cout << line << '\n';
+    }
     // Youssef
 }
 
@@ -126,4 +200,3 @@ bool Maze::isMazeConnected() {
     return false;
     // Youssef
 }
-
