@@ -36,15 +36,26 @@ Cell* Maze::getCell(int x, int y) {
         return &grid[y][x];
     }
     return nullptr;
-}
+}   //Ramy
 
 std::vector<Cell*> Maze::getUnvisitedNeighbors(Cell* cell) {
-    // TODO: Inspect adjacent cells (top/right/bottom/left) and collect
-    // pointers to neighbors whose visited == false. Return the list.
-    (void)cell;
-           // Ramy
-    return {};
-}
+    std::vector<Cell*> neighbors;
+    
+    if (!cell) return neighbors;
+    
+    // Check all four directions
+    Cell* top = getCell(cell->x, cell->y - 1);
+    Cell* right = getCell(cell->x + 1, cell->y);
+    Cell* bottom = getCell(cell->x, cell->y + 1);
+    Cell* left = getCell(cell->x - 1, cell->y);
+    
+    if (top && !top->visited) neighbors.push_back(top);
+    if (right && !right->visited) neighbors.push_back(right);
+    if (bottom && !bottom->visited) neighbors.push_back(bottom);
+    if (left && !left->visited) neighbors.push_back(left);
+    
+    return neighbors;
+}   //Ramy
 
 void Maze::removeWall(Cell* current, Cell* neighbor) {
     // TODO: Determine the direction between current and neighbor and
