@@ -3,6 +3,7 @@
 #include <string>
 #include <chrono>
 #include <algorithm>
+#include <numeric>
 #include <limits>
 
 /**
