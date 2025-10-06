@@ -32,9 +32,9 @@ Maze::Maze(int w, int h, unsigned int seed) : width(w), height(h), rng(seed) {
 
 // Helper methods
 Cell* Maze::getCell(int x, int y) {
-    // TODO: Return pointer to grid[y][x] if in bounds; otherwise return nullptr.
-    (void)x; (void)y;
-           // Ramy
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+        return &grid[y][x];
+    }
     return nullptr;
 }
 
