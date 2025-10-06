@@ -168,7 +168,68 @@ void Maze::printMazeASCII() const {
 }
 
 void Maze::printMazeDetailed() const {
-    // TODO: Print dimensions, total cells, wall count, and call printMaze().
+    // Validate dimensions first (reuse the same defensive checks as printMazeASCII)
+    if (width <= 0 || height <= 0) {
+        std::cout << "Invalid maze dimensions (width/height <= 0).\n";
+        return;
+    }
+
+    if (static_cast<int>(grid.size()) != height) {
+        std::cout << "Maze grid not initialized or size mismatch.\n";
+        return;
+    }
+    for (const auto &row : grid) {
+        if (static_cast<int>(row.size()) != width) {
+            std::cout << "Maze grid row size mismatch.\n";
+            return;
+        }
+    }
+
+    // Compute basic statistics
+    const int totalCells = width * height;
+
+    // Count unique walls. Each cell stores 4 wall flags; however many walls
+    // (internal ones) are duplicated between two adjacent cells. To count
+    // each physical wall exactly once we use the following strategy:
+    //  - For every cell count its RIGHT and BOTTOM walls (these cover all
+    //    internal vertical/horizontal walls once and also count boundary
+    //    walls on the right/bottom edges).
+    //  - Additionally count TOP walls for the first row and LEFT walls for
+    //    the first column to account for the top/left outer boundaries.
+    // This ensures each unique wall is counted exactly once.
+    int wallCount = 0;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const Cell &cell = grid[y][x];
+            if (cell.walls[RIGHT]) ++wallCount;   // count right edge (internal or external)
+            if (cell.walls[BOTTOM]) ++wallCount;  // count bottom edge (internal or external)
+
+            // For the top row, the top wall hasn't been counted yet (no cell above)
+            if (y == 0 && cell.walls[TOP]) ++wallCount;
+            // For the leftmost column, the left wall hasn't been counted yet (no cell to the left)
+            if (x == 0 && cell.walls[LEFT]) ++wallCount;
+        }
+    }
+
+    // Print the detailed header information
+    std::cout << "Maze details:\n";
+    std::cout << "  Dimensions: " << width << " x " << height << "\n";
+    std::cout << "  Total cells: " << totalCells << "\n";
+    std::cout << "  Unique wall count: " << wallCount << "\n";
+    if (totalCells > 0) {
+        std::cout << "  Average walls per cell (unique walls / cells): "
+                  << static_cast<double>(wallCount) / static_cast<double>(totalCells)
+                  << "\n";
+    }
+
+    // Try to print a pretty/unicode representation first. The method
+    // printMaze() is expected to provide a nicer rendering; it may be
+    // unimplemented in the skeleton, so we follow with the robust ASCII
+    // renderer printMazeASCII() to guarantee usable output.
+    std::cout << "\nRendering maze (pretty printer then ASCII fallback):\n";
+    printMaze();       // preferred pretty Unicode rendering (may be a no-op in skeleton)
+    printMazeASCII();  // reliable ASCII rendering implemented earlier
+
     // Youssef
 }
 
