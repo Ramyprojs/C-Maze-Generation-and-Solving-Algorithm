@@ -127,13 +127,38 @@ void Maze::generateMazeIterative() {
         // Ramy
 }
 
-void Maze::generateMazeRecursive(int x, int y) {
-    // TODO: Implement recursive DFS generation starting from (x,y):
-    // - mark current visited
-    // - shuffle unvisited neighbors and recurse
-    (void)x; (void)y;
-        // Ramy
-}
+void Maze::generateMazeIterative() {
+    resetMaze();
+    
+    // Start from top-left corner
+    Cell* currentCell = getCell(0, 0);
+    currentCell->visited = true;
+    cellStack.push(currentCell);
+    
+    while (!cellStack.empty()) {
+        currentCell = cellStack.top();
+        
+        // Get unvisited neighbors
+        std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+        
+        if (!neighbors.empty()) {
+            // Choose random neighbor
+            std::uniform_int_distribution<int> dist(0, neighbors.size() - 1);
+            Cell* chosenNeighbor = neighbors[dist(rng)];
+            
+            // Remove wall between current and chosen neighbor
+            removeWall(currentCell, chosenNeighbor);
+            
+            // Mark chosen neighbor as visited and push to stack
+            chosenNeighbor->visited = true;
+            cellStack.push(chosenNeighbor);
+        } else {
+            // Backtrack - pop from stack
+            cellStack.pop();
+        }
+    }
+}  //Ramy
+
 
 // Display and utility methods
 void Maze::printMaze() const {
