@@ -58,11 +58,29 @@ std::vector<Cell*> Maze::getUnvisitedNeighbors(Cell* cell) {
 }   //Ramy
 
 void Maze::removeWall(Cell* current, Cell* neighbor) {
-    // TODO: Determine the direction between current and neighbor and
-    // clear the corresponding wall flags on both cells.
-    (void)current; (void)neighbor;
-    // Ramy
-}
+    if (!current || !neighbor) return;
+    
+    Direction dir = getDirection(current, neighbor);
+    
+    // Remove wall from current cell
+    current->walls[dir] = false;
+    
+    // Remove corresponding wall from neighbor
+    switch (dir) {
+        case TOP:
+            neighbor->walls[BOTTOM] = false;
+            break;
+        case RIGHT:
+            neighbor->walls[LEFT] = false;
+            break;
+        case BOTTOM:
+            neighbor->walls[TOP] = false;
+            break;
+        case LEFT:
+            neighbor->walls[RIGHT] = false;
+            break;
+    }
+}  //Ramy
 
 Direction Maze::getDirection(Cell* from, Cell* to) {
     // TODO: Compare coordinates and return TOP/RIGHT/BOTTOM/LEFT.
