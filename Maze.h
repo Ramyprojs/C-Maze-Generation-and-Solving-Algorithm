@@ -1,5 +1,5 @@
-#ifndef TEST_MAZE_H
-#define TEST_MAZE_H
+#ifndef MAZE_H
+#define MAZE_H
 
 #include <vector>
 #include <stack>
@@ -12,17 +12,21 @@
  */
 struct Cell {
     bool visited;           // Has this cell been visited during generation?
-    bool walls[4];          // Walls: 0=top, 1=right, 2=bottom, 3=left
-    int x, y;               // Coordinates
-
+    bool walls[4];         // Walls: 0=top, 1=right, 2=bottom, 3=left
+    int x, y;              // Coordinates
+    
     Cell() : visited(false), x(0), y(0) {
-        // TODO: Initialize all walls as present (caller should implement)
-        // Ramy
+        // Initialize all walls as present
+        for (int i = 0; i < 4; i++) {
+            walls[i] = true;
+        }
     }
-
+    
     Cell(int x_pos, int y_pos) : visited(false), x(x_pos), y(y_pos) {
-        // TODO: Initialize all walls as present and set coordinates
-        // Ramy
+        // Initialize all walls as present
+        for (int i = 0; i < 4; i++) {
+            walls[i] = true;
+        }
     }
 };
 
@@ -37,50 +41,50 @@ enum Direction {
 };
 
 /**
- * Maze class implementing maze generation and solving API (skeleton)
+ * Maze class implementing recursive maze generation algorithm
  */
 class Maze {
 private:
-    int width;              // TODO: maze width
-    int height;             // TODO: maze height
-    std::vector<std::vector<Cell>> grid;  // TODO: 2D grid of cells
-    std::stack<Cell*> cellStack;          // TODO: stack for backtracking (if needed)
-    std::mt19937 rng;                     // TODO: random number generator
-
-    // Helper methods (to be implemented)
-    Cell* getCell(int x, int y); // Ramy
-    std::vector<Cell*> getUnvisitedNeighbors(Cell* cell); // Ramy
-    void removeWall(Cell* current, Cell* neighbor); // Ramy
-    Direction getDirection(Cell* from, Cell* to); // Ramy
-
+    int width;              // Maze width
+    int height;             // Maze height
+    std::vector<std::vector<Cell>> grid;  // 2D grid of cells
+    std::stack<Cell*> cellStack;          // Stack for backtracking
+    std::mt19937 rng;                     // Random number generator
+    
+    // Helper methods
+    Cell* getCell(int x, int y);
+    std::vector<Cell*> getUnvisitedNeighbors(Cell* cell);
+    void removeWall(Cell* current, Cell* neighbor);
+    Direction getDirection(Cell* from, Cell* to);
+    
 public:
     // Constructors
-    Maze(); // Moaz
-    Maze(int w, int h); // Youssef
-    Maze(int w, int h, unsigned int seed); // Moaz
-
+    Maze();
+    Maze(int w, int h);
+    Maze(int w, int h, unsigned int seed);
+    
     // Core functionality
     void generateMaze();
-    void generateMazeIterative(); // Ramy
-    void generateMazeRecursive(int x = 0, int y = 0); // Ramy
-
+    void generateMazeIterative();
+    void generateMazeRecursive(int x = 0, int y = 0);
+    
     // Display and utility methods
     void printMaze() const;
     void printMazeASCII() const;
     void printMazeDetailed() const;
     void resetMaze();
-
+    
     // Getters
     int getWidth() const { return width; }
     int getHeight() const { return height; }
     const std::vector<std::vector<Cell>>& getGrid() const { return grid; }
-
+    
     // Maze solving (bonus feature)
     bool solveMaze(int startX = 0, int startY = 0, int endX = -1, int endY = -1);
-    void printSolution() const; // Youssef
-
+    void printSolution() const;
+    
     // Debug and validation methods
-    bool isMazeConnected(); // Check if all cells are reachable (Youssef)
+    bool isMazeConnected(); // Check if all cells are reachable
 };
 
-#endif // TEST_MAZE_H
+#endif // MAZE_H
