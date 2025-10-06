@@ -272,184 +272,191 @@ void Maze::resetMaze() {
     //Youssef
 }
 
-// Solver
+
 bool Maze::solveMaze(int startX, int startY, int endX, int endY) {
+    // Clear any previous solution path
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            grid[y][x].onPath = false;
+        }
+    }
+
     // Defensive checks
-    if (width <= 0 || height <= 0) return false;
-    if (startX < 0 || startX >= width || startY < 0 || startY >= height) return false;
-    if (endX < 0 || endX >= width || endY < 0 || endY >= height) return false;
+    if (width <= 0 || height <= 0) {
+        std::cout << "Invalid maze dimensions.\n";
+        return false;
+    }
+    if (startX < 0 || startX >= width || startY < 0 || startY >= height) {
+        std::cout << "Invalid start position (" << startX << "," << startY << ").\n";
+        return false;
+    }
+    if (endX < 0 || endX >= width || endY < 0 || endY >= height) {
+        std::cout << "Invalid end position (" << endX << "," << endY << ").\n";
+        return false;
+    }
 
     // Direction vectors: TOP, RIGHT, BOTTOM, LEFT
     const int dx[4] = {0, 1, 0, -1};
     const int dy[4] = {-1, 0, 1, 0};
 
-    // Local visited grid
+    // Local visited grid (separate from generation visited flags)
     std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
 
-    // Parent map for backtracking path (stores previous cell)
-    std::vector<std::vector<std::pair<int, int>>> parent(height, std::vector<std::pair<int, int>>(width, {-1, -1}));
+    // Parent map for backtracking path
+    std::vector<std::vector<std::pair<int, int>>> parent(height,
+        std::vector<std::pair<int, int>>(width, {-1, -1}));
 
     // BFS queue
     std::queue<std::pair<int, int>> q;
     q.push({startX, startY});
     visited[startY][startX] = true;
 
-    bool found = false;
+    bool pathFound = false;
 
-    while (!q.empty()) {
+    // BFS to find shortest path
+    while (!q.empty() && !pathFound) {
         auto [x, y] = q.front();
         q.pop();
 
-        // Check if we've reached the goal
+        // Check if we've reached the destination
         if (x == endX && y == endY) {
-            found = true;
+            pathFound = true;
             break;
         }
 
-        // Explore neighbors
+        // Explore all four directions
         for (int dir = 0; dir < 4; ++dir) {
             int nx = x + dx[dir];
             int ny = y + dy[dir];
 
-            // Skip out-of-bounds
+            // Skip out-of-bounds positions
             if (nx < 0 || nx >= width || ny < 0 || ny >= height)
                 continue;
 
-            // Skip if there's a wall between (x,y) and (nx,ny)
-            if (grid[y][x].walls[dir]) continue; // Wall in current cell
+            // Skip if there's a wall blocking movement
+            if (grid[y][x].walls[dir]) continue;
 
-            // Also check the opposite wall in neighbor for safety
+            // Double-check the opposite wall for consistency
             int opposite = (dir + 2) % 4;
             if (grid[ny][nx].walls[opposite]) continue;
 
-            // Visit unvisited cells
-            if (!visited[ny][nx]) {
-                visited[ny][nx] = true;
-                parent[ny][nx] = {x, y};
-                q.push({nx, ny});
-            }
+            // Skip already visited cells
+            if (visited[ny][nx]) continue;
+
+            // Mark as visited and add to queue
+            visited[ny][nx] = true;
+            parent[ny][nx] = {x, y};
+            q.push({nx, ny});
         }
     }
 
-    if (!found) {
-        std::cout << "No path found between start and end.\n";
+    if (!pathFound) {
+        std::cout << "No path found from (" << startX << "," << startY
+                  << ") to (" << endX << "," << endY << ").\n";
         return false;
     }
 
-    // Backtrack the path from end to start
-    std::vector<std::pair<int, int>> path;
-    for (int cx = endX, cy = endY; cx != -1 && cy != -1; ) {
-        path.push_back({cx, cy});
+    // Reconstruct and mark the path
+    std::vector<std::pair<int, int>> solutionPath;
+    int cx = endX, cy = endY;
+
+    while (cx != -1 && cy != -1) {
+        solutionPath.push_back({cx, cy});
+        grid[cy][cx].onPath = true;  // *** FIX: Actually mark the path ***
+
         auto [px, py] = parent[cy][cx];
         cx = px;
         cy = py;
     }
 
-    std::reverse(path.begin(), path.end());
+    // Reverse to get path from start to end
+    std::reverse(solutionPath.begin(), solutionPath.end());
 
-    // Optional: Print or mark the path
-    std::cout << "Path found! (" << path.size() << " steps)\n";
-    for (auto &[x, y] : path) {
-        std::cout << "(" << x << "," << y << ") ";
-        // You could mark the path in grid[y][x], e.g.:
-        // grid[y][x].onPath = true; // if Cell has such a field
+    // Enhanced output with path information
+    std::cout << "✅ Path found! Length: " << solutionPath.size() << " steps\n";
+    std::cout << "Path: ";
+    for (size_t i = 0; i < solutionPath.size(); ++i) {
+        auto [x, y] = solutionPath[i];
+        std::cout << "(" << x << "," << y << ")";
+        if (i < solutionPath.size() - 1) std::cout << " → ";
     }
     std::cout << "\n";
 
     return true;
-
-    //Youssef
 }
 
 void Maze::printSolution() const {
-    // Defensive checks to avoid undefined behavior
     if (width <= 0 || height <= 0 || grid.empty()) {
         std::cout << "Invalid maze dimensions or uninitialized grid.\n";
         return;
     }
 
-    // Decide whether to use Unicode or ASCII based on user’s terminal
-    // (for now, we default to ASCII, but you can toggle this flag if desired)
-    bool useUnicode = true;
+    // Check if there's actually a solution to display
+    bool hasSolution = false;
+    for (int y = 0; y < height && !hasSolution; ++y) {
+        for (int x = 0; x < width && !hasSolution; ++x) {
+            if (grid[y][x].onPath) hasSolution = true;
+        }
+    }
 
-    // Characters used for drawing
-    const char wallASCII = '#';
-    const char pathChar  = '.';   // Path marker
-    const char spaceChar = ' ';   // Empty floor space
+    if (!hasSolution) {
+        std::cout << "No solution path to display. Run solveMaze() first.\n";
+        return;
+    }
 
-    // For Unicode walls
-    const std::string hWall = "──";
-    const std::string vWall = "│";
-
-    // Create a drawing canvas sized for ASCII layout:
-    // Each logical cell maps to (2*y+1, 2*x+1)
     const int rows = height * 2 + 1;
     const int cols = width * 2 + 1;
-    std::vector<std::string> canvas(rows, std::string(cols, wallASCII));
+    std::vector<std::string> canvas(rows, std::string(cols, '#'));
 
-    // Helper to set a safe character in the canvas
     auto setCanvas = [&](int r, int c, char ch) {
         if (r >= 0 && r < rows && c >= 0 && c < cols)
             canvas[r][c] = ch;
     };
 
-    // Draw all cells and mark passages + solution path
+    // Draw maze with solution path
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             const Cell &cell = grid[y][x];
-            int cr = 2 * y + 1; // canvas row
-            int cc = 2 * x + 1; // canvas column
+            int cr = 2 * y + 1;
+            int cc = 2 * x + 1;
 
-            // Mark the cell interior:
-            // If it’s part of the solution, show a path marker '.'
-            setCanvas(cr, cc, cell.onPath ? pathChar : spaceChar);
+            // Mark cell interior (solution path or empty space)
+            char cellChar = cell.onPath ? '●' : ' ';  // Use filled circle for path
+            setCanvas(cr, cc, cellChar);
 
-            // Open passages in each direction (if no wall)
-            if (!cell.walls[TOP])
-                setCanvas(cr - 1, cc, cell.onPath ? pathChar : spaceChar);
-            if (!cell.walls[BOTTOM])
-                setCanvas(cr + 1, cc, cell.onPath ? pathChar : spaceChar);
-            if (!cell.walls[LEFT])
-                setCanvas(cr, cc - 1, cell.onPath ? pathChar : spaceChar);
-            if (!cell.walls[RIGHT])
-                setCanvas(cr, cc + 1, cell.onPath ? pathChar : spaceChar);
-        }
-    }
-
-    // Create entrance and exit openings (optional)
-    setCanvas(0, 1, spaceChar);
-    setCanvas(rows - 1, cols - 2, spaceChar);
-
-    // Header
-    std::cout << "\n=== MAZE SOLUTION (" << width << "x" << height << ") ===\n";
-
-    // Print either Unicode or ASCII walls
-    if (useUnicode) {
-        // Replace '#' characters with Unicode wall symbols for a cleaner look
-        for (int r = 0; r < rows; ++r) {
-            for (int c = 0; c < cols; ++c) {
-                char ch = canvas[r][c];
-                if (ch == wallASCII) {
-                    // Simple replacement logic (for aesthetic walls)
-                    if (r % 2 == 0 && c % 2 == 0) std::cout << "┼";
-                    else if (r % 2 == 0) std::cout << "─";
-                    else if (c % 2 == 0) std::cout << "│";
-                    else std::cout << " ";
-                } else {
-                    std::cout << ch;
-                }
+            // Mark passages (solution extends through passages)
+            if (!cell.walls[TOP]) {
+                char passageChar = cell.onPath ? '●' : ' ';
+                setCanvas(cr - 1, cc, passageChar);
             }
-            std::cout << '\n';
+            if (!cell.walls[BOTTOM]) {
+                char passageChar = cell.onPath ? '●' : ' ';
+                setCanvas(cr + 1, cc, passageChar);
+            }
+            if (!cell.walls[LEFT]) {
+                char passageChar = cell.onPath ? '●' : ' ';
+                setCanvas(cr, cc - 1, passageChar);
+            }
+            if (!cell.walls[RIGHT]) {
+                char passageChar = cell.onPath ? '●' : ' ';
+                setCanvas(cr, cc + 1, passageChar);
+            }
         }
-    } else {
-        // ASCII fallback — draw the grid as-is
-        for (const auto &line : canvas)
-            std::cout << line << '\n';
     }
 
-    //Youssef
-}
+    // Create entrance and exit
+    setCanvas(0, 1, ' ');
+    setCanvas(rows - 1, cols - 2, ' ');
 
+    // Display the solution
+    std::cout << "\n🎯 MAZE SOLUTION (" << width << "x" << height << ") 🎯\n";
+    std::cout << "Legend: # = wall, ● = solution path, space = open\n\n";
+
+    for (const auto &line : canvas) {
+        std::cout << line << '\n';
+    }
+    std::cout << "\n";
+}
 
 
 // Debug and validation
