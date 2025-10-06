@@ -234,8 +234,40 @@ void Maze::printMazeDetailed() const {
 }
 
 void Maze::resetMaze() {
-    // TODO: Clear the stack, set all cells visited=false and all walls=true.
-    // Youssef
+    // Clear any backtracking stack state so generation starts fresh.
+    while (!cellStack.empty()) cellStack.pop();
+
+    // If dimensions are invalid, clear the grid and return early.
+    if (width <= 0 || height <= 0) {
+        grid.clear();
+        return;
+    }
+
+    // Ensure grid has the correct shape [height][width]. If it's the wrong
+    // size we'll resize and default-construct Cells as necessary.
+    if (static_cast<int>(grid.size()) != height) {
+        grid.assign(height, std::vector<Cell>(width));
+    }
+    for (int y = 0; y < height; ++y) {
+        if (static_cast<int>(grid[y].size()) != width) {
+            grid[y].assign(width, Cell());
+        }
+
+        for (int x = 0; x < width; ++x) {
+            Cell &c = grid[y][x];
+            // Reset visitation flag used by generation algorithms
+            c.visited = false;
+
+            // Set all four walls to present. walls[] ordering follows the
+            // enum Direction: TOP=0, RIGHT=1, BOTTOM=2, LEFT=3
+            for (int i = 0; i < 4; ++i) c.walls[i] = true;
+
+            // Ensure coordinates are accurate for helpers that rely on them
+            c.x = x;
+            c.y = y;
+        }
+    }
+    //Youssef
 }
 
 // Solver
