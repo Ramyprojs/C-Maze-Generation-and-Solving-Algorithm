@@ -94,9 +94,24 @@ void generateSeededMaze(Maze &currentMaze) {
  * Compare multiple maze generation algorithms
  */
 void compareMazes() {
-    // TODO: Generate mazes of different sizes and print timings.
-    // Ramy
-}
+    int width = getIntInput("Enter maze width for comparison (5-20): ", 5, 20);
+    int height = getIntInput("Enter maze height for comparison (5-20): ", 5, 20);
+    
+    std::cout << "\nGenerating mazes for comparison...\n";
+    
+    // Iterative maze
+    Maze iterativeMaze(width, height, 12345);
+    std::cout << "\n--- ITERATIVE (STACK-BASED) ALGORITHM ---";
+    generateBasicMaze(iterativeMaze, false);
+    
+    // Recursive maze
+    Maze recursiveMaze(width, height, 12345);
+    std::cout << "\n--- RECURSIVE ALGORITHM ---";
+    generateBasicMaze(recursiveMaze, true);
+    
+    std::cout << "\nNote: Both mazes use the same seed (12345) for comparison.\n";
+}  //Ramy
+
 
 /**
  * Performance testing
