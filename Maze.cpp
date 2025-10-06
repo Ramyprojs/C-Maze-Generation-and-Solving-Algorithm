@@ -162,8 +162,59 @@ void Maze::generateMazeIterative() {
 
 // Display and utility methods
 void Maze::printMaze() const {
-    // TODO: Pretty-print maze using Unicode box drawing characters.
-    // Ramy
+    std::cout << "\n=== MAZE (" << width << "x" << height << ") ===\n";
+    
+    // Top border
+    std::cout << "┌";
+    for (int x = 0; x < width; x++) {
+        std::cout << "──";
+        if (x < width - 1) std::cout << "┬";
+    }
+    std::cout << "┐\n";
+    
+    // Maze content
+    for (int y = 0; y < height; y++) {
+        // Vertical walls and spaces
+        std::cout << "│";
+        for (int x = 0; x < width; x++) {
+            std::cout << "  ";
+            if (x < width - 1) {
+                std::cout << (grid[y][x].walls[RIGHT] ? "│" : " ");
+            }
+        }
+        std::cout << "│\n";
+        
+        // Horizontal walls (except for last row)
+        if (y < height - 1) {
+            std::cout << "├";
+            for (int x = 0; x < width; x++) {
+                std::cout << (grid[y][x].walls[BOTTOM] ? "──" : "  ");
+                if (x < width - 1) {
+                    // Corner character
+                    bool hasBottom = grid[y][x].walls[BOTTOM];
+                    bool hasRight = grid[y][x].walls[RIGHT];
+                    bool hasBottomRight = grid[y][x + 1].walls[BOTTOM];
+                    bool hasBottomLeft = grid[y + 1][x].walls[RIGHT];
+                    
+                    if (hasBottom && hasRight && hasBottomRight && hasBottomLeft) std::cout << "┼";
+                    else if (hasBottom && hasBottomRight) std::cout << "┬";
+                    else if (hasRight && hasBottomLeft) std::cout << "├";
+                    else if (hasBottom || hasBottomRight) std::cout << "─";
+                    else if (hasRight || hasBottomLeft) std::cout << "│";
+                    else std::cout << " ";
+                }
+            }
+            std::cout << "┤\n";
+        }
+    }
+    
+    // Bottom border
+    std::cout << "└";
+    for (int x = 0; x < width; x++) {
+        std::cout << "──";
+        if (x < width - 1) std::cout << "┴";
+    }
+    std::cout << "┘\n";
 }
 
 void Maze::printMazeASCII() const {
