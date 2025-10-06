@@ -27,11 +27,24 @@ int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {
  * Generate and display a basic maze
  */
 void generateBasicMaze(Maze& maze, bool useRecursive = false) {
-    // TODO: Measure timing, call maze.generateMazeIterative() or
-    // maze.generateMazeRecursive(), then print results with maze.printMaze().
-    (void)maze; (void)useRecursive;
-    // Ramy
-}
+    std::cout << "\nGenerating maze using " 
+              << (useRecursive ? "recursive" : "iterative") 
+              << " algorithm...\n";
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    if (useRecursive) {
+        maze.generateMazeRecursive();
+    } else {
+        maze.generateMazeIterative();
+    }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    
+    std::cout << "Generation completed in " << duration.count() << " microseconds.\n";
+    maze.printMaze();
+}  //Ramy
 
 /**
  * Generate maze with custom dimensions (now updates a passed-in currentMaze)
