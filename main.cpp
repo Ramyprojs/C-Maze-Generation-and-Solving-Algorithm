@@ -8,20 +8,46 @@
  * Display the main menu
  */
 void displayMenu() {
-    // TODO: Print the menu options to stdout (copy from the real project)
-    // Moaz
+    std::cout << "\n" << std::string(50, '=') << "\n";
+    std::cout << "        RECURSIVE MAZE GENERATOR\n";
+    std::cout << std::string(50, '=') << "\n";
+    std::cout << "1. Generate maze (Iterative - Stack-based)\n";
+    std::cout << "2. Generate maze (Recursive)\n";
+    std::cout << "3. Generate custom size maze\n";
+    std::cout << "4. Generate maze with custom seed\n";
+    std::cout << "5. Show maze in ASCII format\n";
+    std::cout << "6. Show detailed maze information\n";
+    std::cout << "7. Solve current maze\n";
+    std::cout << "8. Generate multiple mazes comparison\n";
+    std::cout << "9. Performance test\n";
+    std::cout << "A. Check maze connectivity (debug)\n";
+    std::cout << "0. Exit\n";
+    std::cout << std::string(50, '=') << "\n";
+    std::cout << "Choose an option: ";
 }
-
+    // Moaz
+    
 /**
  * Get integer input with validation
  */
-int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {
+int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {  
     // TODO: Prompt the user and validate numeric input between min and max.
-    // Placeholder: return min as a safe default for compilation and tests.
-    (void)prompt; (void)min; (void)max;
-    // Moaz
-    return min;
+    int value;
+    while (true) {
+        std::cout << prompt;
+        if (std::cin >> value && value >= min && value <= max) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return value;
+        } else {
+            std::cout << "Invalid input. Please enter a number between " 
+                      << min << " and " << max << ".\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
 }
+ //Moaaz
+
 
 /**
  * Generate and display a basic maze
@@ -85,22 +111,112 @@ int main() {
     // TODO: Implement full interactive loop. This skeleton just demonstrates
     // how the real main is structured. Replace with real logic when
     // implementing tests.
-    std::cout << "test_maze skeleton main (no-op).\n";
-    // Moaz
-    return 0;
+    
+    Maze maze;
+    int choice;
+    
+    do {
+        displayMenu();
+        choice = getIntInput("", 1, 8);
+        
+        switch (choice) {
+            case 1:
+                currentMaze = Maze(10, 10);
+                generateBasicMaze(currentMaze, false);
+                break;
+                
+            case 2:
+                currentMaze = Maze(10, 10);
+                generateBasicMaze(currentMaze, true);
+                break;
+                
+            case 3:
+                generateCustomMaze(currentMaze);
+                break;
+                
+            case 4:
+                generateSeededMaze(currentMaze);
+                break;
+                
+            case 5:
+                std::cout << "\nASCII representation of current maze:\n";
+                currentMaze.printMazeASCII();
+                break;
+                
+            case 6:
+                currentMaze.printMazeDetailed();
+                break;
+                
+            case 7:
+                solveMazeDemo(currentMaze);
+                break;
+                
+            case 8:
+                compareMazes();
+                break;
+                
+            case 9:
+                performanceTest();
+                break;
+                
+            case 10:
+                std::cout << "\nChecking maze connectivity...\n";
+                currentMaze.isMazeConnected();
+                break;
+                
+            case 0:
+                std::cout << "\nThank you for using the Recursive Maze Generator!\n";
+                std::cout << "Goodbye!\n";
+                break;
+                
+            default:
+                std::cout << "Invalid option. Please try again.\n";
+        }
+}  //Moaz
 }
 
 /**
  * Additional utility functions for demonstration
  */
-namespace MazeUtils {
-    void sizeDemonstration() {
-        // TODO: Construct several mazes of different sizes and print them.
-        // Moaz
+namespace MazeUtils {        
+  void sizeDemonstration() {       
+      // TODO: Construct several mazes of different sizes and print them.
+      std::cout << "\n=== SIZE DEMONSTRATION ===\n";
+        std::vector<std::pair<int, int>> sizes = {{5, 5}, {8, 8}, {12, 12}};
+        
+        for (const auto& size : sizes) {
+            Maze demo(size.first, size.second);
+            demo.generateMazeIterative();
+            std::cout << "\nMaze " << size.first << "x" << size.second << ":\n";
+            demo.printMaze();
+        }
     }
+    }
+        // Moaz
 
-    void showComplexityInfo() {
-        // TODO: Print algorithm complexity information.
+   void showComplexityInfo() {
+    // TODO: Print algorithm complexity information.
+    std::cout << "\n=== Maze Generation Algorithm Complexities ===\n";
+    std::cout << "1. Depth-First Search (DFS):\n";
+    std::cout << "   - Time: O(n) where n is number of cells\n";
+    std::cout << "   - Space: O(n) for recursion stack\n";
+    std::cout << "   - Characteristics: Creates long corridors, few dead ends\n\n";
+    
+    std::cout << "2. Prim's Algorithm:\n";
+    std::cout << "   - Time: O(n log n) with binary heap\n";
+    std::cout << "   - Space: O(n) for priority queue\n";
+    std::cout << "   - Characteristics: More uniform, many short dead ends\n\n";
+    
+    std::cout << "3. Kruskal's Algorithm:\n";
+    std::cout << "   - Time: O(n log n) with union-find\n";
+    std::cout << "   - Space: O(n) for disjoint set\n";
+    std::cout << "   - Characteristics: Balanced, medium difficulty\n\n";
+    
+    std::cout << "4. Recursive Division:\n";
+    std::cout << "   - Time: O(n log n)\n";
+    std::cout << "   - Space: O(log n) for recursion\n";
+    std::cout << "   - Characteristics: Perfect maze, rectangular patterns\n";
+}
         // Moaz
     }
 }
