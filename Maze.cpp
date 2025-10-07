@@ -64,60 +64,189 @@ Maze::Maze(int w, int h, unsigned int seed) : width(w), height(h), rng(seed) {
 
 // Helper methods
 Cell* Maze::getCell(int x, int y) {
-    // TODO: Return pointer to grid[y][x] if in bounds; otherwise return nullptr.
-    (void)x; (void)y;
-           // Ramy
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+        return &grid[y][x];
+    }
     return nullptr;
-}
+}   //Ramy
 
 std::vector<Cell*> Maze::getUnvisitedNeighbors(Cell* cell) {
-    // TODO: Inspect adjacent cells (top/right/bottom/left) and collect
-    // pointers to neighbors whose visited == false. Return the list.
-    (void)cell;
-           // Ramy
-    return {};
-}
+    std::vector<Cell*> neighbors;
+    
+    if (!cell) return neighbors;
+    
+    // Check all four directions
+    Cell* top = getCell(cell->x, cell->y - 1);
+    Cell* right = getCell(cell->x + 1, cell->y);
+    Cell* bottom = getCell(cell->x, cell->y + 1);
+    Cell* left = getCell(cell->x - 1, cell->y);
+    
+    if (top && !top->visited) neighbors.push_back(top);
+    if (right && !right->visited) neighbors.push_back(right);
+    if (bottom && !bottom->visited) neighbors.push_back(bottom);
+    if (left && !left->visited) neighbors.push_back(left);
+    
+    return neighbors;
+}   //Ramy
 
 void Maze::removeWall(Cell* current, Cell* neighbor) {
-    // TODO: Determine the direction between current and neighbor and
-    // clear the corresponding wall flags on both cells.
-    (void)current; (void)neighbor;
-    // Ramy
-}
+    if (!current || !neighbor) return;
+    
+    Direction dir = getDirection(current, neighbor);
+    
+    // Remove wall from current cell
+    current->walls[dir] = false;
+    
+    // Remove corresponding wall from neighbor
+    switch (dir) {
+        case TOP:
+            neighbor->walls[BOTTOM] = false;
+            break;
+        case RIGHT:
+            neighbor->walls[LEFT] = false;
+            break;
+        case BOTTOM:
+            neighbor->walls[TOP] = false;
+            break;
+        case LEFT:
+            neighbor->walls[RIGHT] = false;
+            break;
+    }
+}  //Ramy
 
 Direction Maze::getDirection(Cell* from, Cell* to) {
-    // TODO: Compare coordinates and return TOP/RIGHT/BOTTOM/LEFT.
-    (void)from; (void)to;
-           // Ramy
-    return TOP;
-}
+    if (to->y < from->y) return TOP;
+    if (to->x > from->x) return RIGHT;
+    if (to->y > from->y) return BOTTOM;
+    return LEFT;
+} //Ramy
 
 // Core functionality
 void Maze::generateMaze() {
-    // TODO: Default to iterative generation (call generateMazeIterative()).
+    generateMazeIterative();
+} //Ramy
+
+void Maze::generateMazeIterative() {
+    resetMaze();
+    
+    // Start from top-left corner
+    Cell* currentCell = getCell(0, 0);
+    currentCell->visited = true;
+    cellStack.push(currentCell);
+    
+    while (!cellStack.empty()) {
+        currentCell = cellStack.top();
+        
+        // Get unvisited neighbors
+        std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+        
+        if (!neighbors.empty()) {
+            // Choose random neighbor
+            std::uniform_int_distribution<int> dist(0, neighbors.size() - 1);
+            Cell* chosenNeighbor = neighbors[dist(rng)];
+            
+            // Remove wall between current and chosen neighbor
+            removeWall(currentCell, chosenNeighbor);
+            
+            // Mark chosen neighbor as visited and push to stack
+            chosenNeighbor->visited = true;
+            cellStack.push(chosenNeighbor);
+        } else {
+            // Backtrack - pop from stack
+            cellStack.pop();
+        }
+    }
         // Ramy
 }
 
 void Maze::generateMazeIterative() {
-    // TODO: Implement stack-based DFS generation:
-    // - reset maze
-    // - start at (0,0), mark visited
-    // - while stack not empty: pick unvisited neighbor, remove wall, push, else pop
-        // Ramy
-}
+    resetMaze();
+    
+    // Start from top-left corner
+    Cell* currentCell = getCell(0, 0);
+    currentCell->visited = true;
+    cellStack.push(currentCell);
+    
+    while (!cellStack.empty()) {
+        currentCell = cellStack.top();
+        
+        // Get unvisited neighbors
+        std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+        
+        if (!neighbors.empty()) {
+            // Choose random neighbor
+            std::uniform_int_distribution<int> dist(0, neighbors.size() - 1);
+            Cell* chosenNeighbor = neighbors[dist(rng)];
+            
+            // Remove wall between current and chosen neighbor
+            removeWall(currentCell, chosenNeighbor);
+            
+            // Mark chosen neighbor as visited and push to stack
+            chosenNeighbor->visited = true;
+            cellStack.push(chosenNeighbor);
+        } else {
+            // Backtrack - pop from stack
+            cellStack.pop();
+        }
+    }
+}  //Ramy
 
-void Maze::generateMazeRecursive(int x, int y) {
-    // TODO: Implement recursive DFS generation starting from (x,y):
-    // - mark current visited
-    // - shuffle unvisited neighbors and recurse
-    (void)x; (void)y;
-        // Ramy
-}
 
 // Display and utility methods
 void Maze::printMaze() const {
-    // TODO: Pretty-print maze using Unicode box drawing characters.
-    // Ramy
+    std::cout << "\n=== MAZE (" << width << "x" << height << ") ===\n";
+    
+    // Top border
+    std::cout << "┌";
+    for (int x = 0; x < width; x++) {
+        std::cout << "──";
+        if (x < width - 1) std::cout << "┬";
+    }
+    std::cout << "┐\n";
+    
+    // Maze content
+    for (int y = 0; y < height; y++) {
+        // Vertical walls and spaces
+        std::cout << "│";
+        for (int x = 0; x < width; x++) {
+            std::cout << "  ";
+            if (x < width - 1) {
+                std::cout << (grid[y][x].walls[RIGHT] ? "│" : " ");
+            }
+        }
+        std::cout << "│\n";
+        
+        // Horizontal walls (except for last row)
+        if (y < height - 1) {
+            std::cout << "├";
+            for (int x = 0; x < width; x++) {
+                std::cout << (grid[y][x].walls[BOTTOM] ? "──" : "  ");
+                if (x < width - 1) {
+                    // Corner character
+                    bool hasBottom = grid[y][x].walls[BOTTOM];
+                    bool hasRight = grid[y][x].walls[RIGHT];
+                    bool hasBottomRight = grid[y][x + 1].walls[BOTTOM];
+                    bool hasBottomLeft = grid[y + 1][x].walls[RIGHT];
+                    
+                    if (hasBottom && hasRight && hasBottomRight && hasBottomLeft) std::cout << "┼";
+                    else if (hasBottom && hasBottomRight) std::cout << "┬";
+                    else if (hasRight && hasBottomLeft) std::cout << "├";
+                    else if (hasBottom || hasBottomRight) std::cout << "─";
+                    else if (hasRight || hasBottomLeft) std::cout << "│";
+                    else std::cout << " ";
+                }
+            }
+            std::cout << "┤\n";
+        }
+    }
+    
+    // Bottom border
+    std::cout << "└";
+    for (int x = 0; x < width; x++) {
+        std::cout << "──";
+        if (x < width - 1) std::cout << "┴";
+    }
+    std::cout << "┘\n";
 }
 
 void Maze::printMazeASCII() const {
