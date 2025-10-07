@@ -3,20 +3,11 @@
 #include <chrono>
 #include <queue>
 
-
 /**
- * test_maze/Maze.cpp
- *
- * Skeleton implementation: each function mirrors the real project's API
- * but contains only TODO comments describing intended behavior and
- * safe placeholder returns so the file compiles.
+ * Default constructor - creates a 10x10 maze
  */
-
-// Constructors  
 Maze::Maze() : width(10), height(10), rng(std::chrono::steady_clock::now().time_since_epoch().count()) {
     grid.resize(height, std::vector<Cell>(width));
-     // TODO: Initialize a 10x10 grid, set coordinates for each Cell,
-    // and initialize RNG (e.g., with a time-based seed).
     
     // Initialize grid with coordinates
     for (int y = 0; y < height; y++) {
@@ -25,33 +16,27 @@ Maze::Maze() : width(10), height(10), rng(std::chrono::steady_clock::now().time_
         }
     }
 }
-        // Moaz
 
- /**
+/**
  * Constructor with custom dimensions
  */
 Maze::Maze(int w, int h) : width(w), height(h), rng(std::chrono::steady_clock::now().time_since_epoch().count()) {
     grid.resize(height, std::vector<Cell>(width));
     
-     // TODO: Resize grid to [height][width], set coordinates for each Cell,
-    // and initialize RNG with a default seed.
     // Initialize grid with coordinates
-    
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             grid[y][x] = Cell(x, y);
         }
     }
 }
-    // Moaz
-   
+
 /**
  * Constructor with custom dimensions and seed
  */
 Maze::Maze(int w, int h, unsigned int seed) : width(w), height(h), rng(seed) {
     grid.resize(height, std::vector<Cell>(width));
-        // TODO: Resize grid and initialize RNG with provided seed.
-
+    
     // Initialize grid with coordinates
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -59,17 +44,20 @@ Maze::Maze(int w, int h, unsigned int seed) : width(w), height(h), rng(seed) {
         }
     }
 }
-    // Moaz
 
-
-// Helper methods
+/**
+ * Get cell at specific coordinates
+ */
 Cell* Maze::getCell(int x, int y) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
         return &grid[y][x];
     }
     return nullptr;
-}   //Ramy
+}
 
+/**
+ * Get all unvisited neighbors of a cell
+ */
 std::vector<Cell*> Maze::getUnvisitedNeighbors(Cell* cell) {
     std::vector<Cell*> neighbors;
     
@@ -87,8 +75,21 @@ std::vector<Cell*> Maze::getUnvisitedNeighbors(Cell* cell) {
     if (left && !left->visited) neighbors.push_back(left);
     
     return neighbors;
-}   //Ramy
+}
 
+/**
+ * Get direction from one cell to another
+ */
+Direction Maze::getDirection(Cell* from, Cell* to) {
+    if (to->y < from->y) return TOP;
+    if (to->x > from->x) return RIGHT;
+    if (to->y > from->y) return BOTTOM;
+    return LEFT;
+}
+
+/**
+ * Remove wall between two adjacent cells
+ */
 void Maze::removeWall(Cell* current, Cell* neighbor) {
     if (!current || !neighbor) return;
     
@@ -112,53 +113,18 @@ void Maze::removeWall(Cell* current, Cell* neighbor) {
             neighbor->walls[RIGHT] = false;
             break;
     }
-}  //Ramy
-
-Direction Maze::getDirection(Cell* from, Cell* to) {
-    if (to->y < from->y) return TOP;
-    if (to->x > from->x) return RIGHT;
-    if (to->y > from->y) return BOTTOM;
-    return LEFT;
-} //Ramy
-
-// Core functionality
-void Maze::generateMaze() {
-    generateMazeIterative();
-} //Ramy
-
-void Maze::generateMazeIterative() {
-    resetMaze();
-    
-    // Start from top-left corner
-    Cell* currentCell = getCell(0, 0);
-    currentCell->visited = true;
-    cellStack.push(currentCell);
-    
-    while (!cellStack.empty()) {
-        currentCell = cellStack.top();
-        
-        // Get unvisited neighbors
-        std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
-        
-        if (!neighbors.empty()) {
-            // Choose random neighbor
-            std::uniform_int_distribution<int> dist(0, neighbors.size() - 1);
-            Cell* chosenNeighbor = neighbors[dist(rng)];
-            
-            // Remove wall between current and chosen neighbor
-            removeWall(currentCell, chosenNeighbor);
-            
-            // Mark chosen neighbor as visited and push to stack
-            chosenNeighbor->visited = true;
-            cellStack.push(chosenNeighbor);
-        } else {
-            // Backtrack - pop from stack
-            cellStack.pop();
-        }
-    }
-        // Ramy
 }
 
+/**
+ * Main maze generation method (uses iterative approach by default)
+ */
+void Maze::generateMaze() {
+    generateMazeIterative();
+}
+
+/**
+ * Iterative maze generation using stack-based depth-first search
+ */
 void Maze::generateMazeIterative() {
     resetMaze();
     
@@ -189,10 +155,79 @@ void Maze::generateMazeIterative() {
             cellStack.pop();
         }
     }
-}  //Ramy
+}
 
+/**
+ * Recursive maze generation algorithm
+ */
+void Maze::generateMazeRecursive(int x, int y) {
+    // Base case: if starting a new maze
+    static bool isNewMaze = true;
+    if (isNewMaze) {
+        resetMaze();
+        isNewMaze = false;
+    }
+    
+    Cell* currentCell = getCell(x, y);
+    if (!currentCell) {
+        isNewMaze = true; // Reset for next call
+        return;
+    }
+    
+    currentCell->visited = true;
+    
+    // Get all unvisited neighbors
+    std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+    
+    // Shuffle neighbors for randomness
+    std::shuffle(neighbors.begin(), neighbors.end(), rng);
+    
+    // Recursively visit each unvisited neighbor
+    for (Cell* neighbor : neighbors) {
+        if (!neighbor->visited) {
+            removeWall(currentCell, neighbor);
+            generateMazeRecursive(neighbor->x, neighbor->y);
+        }
+    }
+    
+    // Check if we're done (all cells visited)
+    bool allVisited = true;
+    for (int cy = 0; cy < height && allVisited; cy++) {
+        for (int cx = 0; cx < width && allVisited; cx++) {
+            if (!grid[cy][cx].visited) {
+                allVisited = false;
+            }
+        }
+    }
+    
+    if (allVisited) {
+        isNewMaze = true; // Reset for next call
+    }
+}
 
-// Display and utility methods
+/**
+ * Reset maze to initial state
+ */
+void Maze::resetMaze() {
+    // Clear stack
+    while (!cellStack.empty()) {
+        cellStack.pop();
+    }
+    
+    // Reset all cells
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            grid[y][x].visited = false;
+            for (int i = 0; i < 4; i++) {
+                grid[y][x].walls[i] = true;
+            }
+        }
+    }
+}
+
+/**
+ * Print maze in a simple format
+ */
 void Maze::printMaze() const {
     std::cout << "\n=== MAZE (" << width << "x" << height << ") ===\n";
     
@@ -249,438 +284,255 @@ void Maze::printMaze() const {
     std::cout << "┘\n";
 }
 
+/**
+ * Print maze in ASCII format (alternative visualization)
+ */
 void Maze::printMazeASCII() const {
-    // Defensive validation: ensure dimensions look sane
-    if (width <= 0 || height <= 0) {
-        std::cout << "Invalid maze dimensions (width/height <= 0).\n";
-        return;
+    std::cout << "\n=== ASCII MAZE (" << width << "x" << height << ") ===\n";
+    
+    // Top border
+    for (int x = 0; x < width * 2 + 1; x++) {
+        std::cout << "#";
     }
-
-    // If grid is not initialized to the expected size, avoid UB and print a warning
-    if (static_cast<int>(grid.size()) != height) {
-        std::cout << "Maze grid not initialized or size mismatch.\n";
-        return;
-    }
-    for (const auto &row : grid) {
-        if (static_cast<int>(row.size()) != width) {
-            std::cout << "Maze grid row size mismatch.\n";
-            return;
+    std::cout << "\n";
+    
+    for (int y = 0; y < height; y++) {
+        // Left border
+        std::cout << "#";
+        
+        // Cell content and right walls
+        for (int x = 0; x < width; x++) {
+            std::cout << " ";  // Cell space
+            std::cout << (grid[y][x].walls[RIGHT] ? "#" : " ");
+        }
+        std::cout << "\n";
+        
+        // Bottom walls (except for last row)
+        if (y < height - 1) {
+            std::cout << "#";
+            for (int x = 0; x < width; x++) {
+                std::cout << (grid[y][x].walls[BOTTOM] ? "#" : " ");
+                std::cout << "#";
+            }
+            std::cout << "\n";
         }
     }
-
-    // Canvas dimensions: we use a compact representation where each cell
-    // maps to coordinates (2*y+1, 2*x+1) and walls occupy the other positions.
-    const int rows = height * 2 + 1;
-    const int cols = width * 2 + 1;
-
-    // Create canvas filled entirely with wall characters '#'
-    std::vector<std::string> canvas(rows, std::string(cols, '#'));
-
-    // Helper to safely set a character in the canvas
-    auto setCanvas = [&](int r, int c, char ch) {
-        if (r >= 0 && r < rows && c >= 0 && c < cols) canvas[r][c] = ch;
-    };
-
-    // Iterate each logical cell and carve out the cell interior and any
-    // openings where walls are absent. We interpret Cell.walls[] as:
-    // walls[TOP]==true means a wall exists on the top side, false means an opening.
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            const Cell &cell = grid[y][x];
-            int cr = 2 * y + 1; // canvas row
-            int cc = 2 * x + 1; // canvas col
-
-            // Mark the cell interior as an open space
-            setCanvas(cr, cc, ' ');
-
-            // If there's no top wall, open a passage above the cell
-            if (cell.walls[TOP] == false) {
-                setCanvas(cr - 1, cc, ' ');
-            }
-
-            // If there's no bottom wall, open a passage below the cell
-            if (cell.walls[BOTTOM] == false) {
-                setCanvas(cr + 1, cc, ' ');
-            }
-
-            // If there's no left wall, open a passage to the left
-            if (cell.walls[LEFT] == false) {
-                setCanvas(cr, cc - 1, ' ');
-            }
-
-            // If there's no right wall, open a passage to the right
-            if (cell.walls[RIGHT] == false) {
-                setCanvas(cr, cc + 1, ' ');
-            }
-        }
+    
+    // Bottom border
+    for (int x = 0; x < width * 2 + 1; x++) {
+        std::cout << "#";
     }
-
-    // Optionally open a conventional entrance and exit so the maze is usable
-    // Entrance: top row just above cell (0,0) at (0,1). Exit: bottom row
-    // just below cell (height-1,width-1) at (rows-1, cols-2).
-    setCanvas(0, 1, ' ');
-    setCanvas(rows - 1, cols - 2, ' ');
-
-    // Print the canvas line by line
-    for (const auto &line : canvas) {
-        std::cout << line << '\n';
-    }
-    // Youssef
+    std::cout << "\n";
 }
 
+/**
+ * Print detailed maze information
+ */
 void Maze::printMazeDetailed() const {
-    // Validate dimensions first (reuse the same defensive checks as printMazeASCII)
-    if (width <= 0 || height <= 0) {
-        std::cout << "Invalid maze dimensions (width/height <= 0).\n";
-        return;
-    }
-
-    if (static_cast<int>(grid.size()) != height) {
-        std::cout << "Maze grid not initialized or size mismatch.\n";
-        return;
-    }
-    for (const auto &row : grid) {
-        if (static_cast<int>(row.size()) != width) {
-            std::cout << "Maze grid row size mismatch.\n";
-            return;
-        }
-    }
-
-    // Compute basic statistics
-    const int totalCells = width * height;
-
-    // Count unique walls. Each cell stores 4 wall flags; however many walls
-    // (internal ones) are duplicated between two adjacent cells. To count
-    // each physical wall exactly once we use the following strategy:
-    //  - For every cell count its RIGHT and BOTTOM walls (these cover all
-    //    internal vertical/horizontal walls once and also count boundary
-    //    walls on the right/bottom edges).
-    //  - Additionally count TOP walls for the first row and LEFT walls for
-    //    the first column to account for the top/left outer boundaries.
-    // This ensures each unique wall is counted exactly once.
+    std::cout << "\n=== DETAILED MAZE INFO ===\n";
+    std::cout << "Dimensions: " << width << "x" << height << "\n";
+    std::cout << "Total cells: " << width * height << "\n";
+    
     int wallCount = 0;
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            const Cell &cell = grid[y][x];
-            if (cell.walls[RIGHT]) ++wallCount;   // count right edge (internal or external)
-            if (cell.walls[BOTTOM]) ++wallCount;  // count bottom edge (internal or external)
-
-            // For the top row, the top wall hasn't been counted yet (no cell above)
-            if (y == 0 && cell.walls[TOP]) ++wallCount;
-            // For the leftmost column, the left wall hasn't been counted yet (no cell to the left)
-            if (x == 0 && cell.walls[LEFT]) ++wallCount;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            for (int w = 0; w < 4; w++) {
+                if (grid[y][x].walls[w]) wallCount++;
+            }
         }
     }
-
-    // Print the detailed header information
-    std::cout << "Maze details:\n";
-    std::cout << "  Dimensions: " << width << " x " << height << "\n";
-    std::cout << "  Total cells: " << totalCells << "\n";
-    std::cout << "  Unique wall count: " << wallCount << "\n";
-    if (totalCells > 0) {
-        std::cout << "  Average walls per cell (unique walls / cells): "
-                  << static_cast<double>(wallCount) / static_cast<double>(totalCells)
-                  << "\n";
-    }
-
-    // Try to print a pretty/unicode representation first. The method
-    // printMaze() is expected to provide a nicer rendering; it may be
-    // unimplemented in the skeleton, so we follow with the robust ASCII
-    // renderer printMazeASCII() to guarantee usable output.
-    std::cout << "\nRendering maze (pretty printer then ASCII fallback):\n";
-    printMaze();       // preferred pretty Unicode rendering (may be a no-op in skeleton)
-    printMazeASCII();  // reliable ASCII rendering implemented earlier
-
-    // Youssef
+    std::cout << "Total walls: " << wallCount / 2 << "\n"; // Divide by 2 since walls are shared
+    
+    printMaze();
 }
 
-void Maze::resetMaze() {
-    // Clear any backtracking stack state so generation starts fresh.
-    while (!cellStack.empty()) cellStack.pop();
-
-    // If dimensions are invalid, clear the grid and return early.
-    if (width <= 0 || height <= 0) {
-        grid.clear();
-        return;
-    }
-
-    // Ensure grid has the correct shape [height][width]. If it's the wrong
-    // size we'll resize and default-construct Cells as necessary.
-    if (static_cast<int>(grid.size()) != height) {
-        grid.assign(height, std::vector<Cell>(width));
-    }
-    for (int y = 0; y < height; ++y) {
-        if (static_cast<int>(grid[y].size()) != width) {
-            grid[y].assign(width, Cell());
-        }
-
-        for (int x = 0; x < width; ++x) {
-            Cell &c = grid[y][x];
-            // Reset visitation flag used by generation algorithms
-            c.visited = false;
-
-            // Set all four walls to present. walls[] ordering follows the
-            // enum Direction: TOP=0, RIGHT=1, BOTTOM=2, LEFT=3
-            for (int i = 0; i < 4; ++i) c.walls[i] = true;
-
-            // Ensure coordinates are accurate for helpers that rely on them
-            c.x = x;
-            c.y = y;
-        }
-    }
-    //Youssef
-}
-
-
+/**
+ * Simple maze solver using DFS (bonus feature)
+ */
 bool Maze::solveMaze(int startX, int startY, int endX, int endY) {
-    // Clear any previous solution path
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            grid[y][x].onPath = false;
-        }
-    }
-
-    // Defensive checks
-    if (width <= 0 || height <= 0) {
-        std::cout << "Invalid maze dimensions.\n";
-        return false;
-    }
+    // Set default end position if not specified
+    if (endX == -1) endX = width - 1;
+    if (endY == -1) endY = height - 1;
+    
+    // Validate start and end positions
     if (startX < 0 || startX >= width || startY < 0 || startY >= height) {
-        std::cout << "Invalid start position (" << startX << "," << startY << ").\n";
+        std::cout << "\nInvalid start position!\n";
         return false;
     }
     if (endX < 0 || endX >= width || endY < 0 || endY >= height) {
-        std::cout << "Invalid end position (" << endX << "," << endY << ").\n";
+        std::cout << "\nInvalid end position!\n";
+        return false;
+    }
+    
+    // Use BFS to reliably find the shortest path from start to end.
+    if (endX == -1) endX = width - 1;
+    if (endY == -1) endY = height - 1;
+
+    // Validate start and end positions
+    if (startX < 0 || startX >= width || startY < 0 || startY >= height) {
+        std::cout << "\nInvalid start position!\n";
+        return false;
+    }
+    if (endX < 0 || endX >= width || endY < 0 || endY >= height) {
+        std::cout << "\nInvalid end position!\n";
         return false;
     }
 
-    // Direction vectors: TOP, RIGHT, BOTTOM, LEFT
-    const int dx[4] = {0, 1, 0, -1};
-    const int dy[4] = {-1, 0, 1, 0};
+    // Local visited and parent trackers (do not modify grid visited flags here)
+    std::vector<std::vector<bool>> visitedLocal(height, std::vector<bool>(width, false));
+    std::vector<std::vector<std::pair<int,int>>> parent(height, std::vector<std::pair<int,int>>(width, {-1,-1}));
 
-    // Local visited grid (separate from generation visited flags)
-    std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
-
-    // Parent map for backtracking path
-    std::vector<std::vector<std::pair<int, int>>> parent(height,
-        std::vector<std::pair<int, int>>(width, {-1, -1}));
-
-    // BFS queue
-    std::queue<std::pair<int, int>> q;
+    std::queue<std::pair<int,int>> q;
     q.push({startX, startY});
-    visited[startY][startX] = true;
+    visitedLocal[startY][startX] = true;
+    bool found = false;
 
-    bool pathFound = false;
+    while (!q.empty()) {
+        auto [cx, cy] = q.front(); q.pop();
 
-    // BFS to find shortest path
-    while (!q.empty() && !pathFound) {
-        auto [x, y] = q.front();
-        q.pop();
-
-        // Check if we've reached the destination
-        if (x == endX && y == endY) {
-            pathFound = true;
+        if (cx == endX && cy == endY) {
+            found = true;
             break;
         }
 
-        // Explore all four directions
-        for (int dir = 0; dir < 4; ++dir) {
-            int nx = x + dx[dir];
-            int ny = y + dy[dir];
+        Cell* current = getCell(cx, cy);
+        if (!current) continue;
 
-            // Skip out-of-bounds positions
-            if (nx < 0 || nx >= width || ny < 0 || ny >= height)
-                continue;
-
-            // Skip if there's a wall blocking movement
-            if (grid[y][x].walls[dir]) continue;
-
-            // Double-check the opposite wall for consistency
-            int opposite = (dir + 2) % 4;
-            if (grid[ny][nx].walls[opposite]) continue;
-
-            // Skip already visited cells
-            if (visited[ny][nx]) continue;
-
-            // Mark as visited and add to queue
-            visited[ny][nx] = true;
-            parent[ny][nx] = {x, y};
-            q.push({nx, ny});
+        // Explore neighbors allowed by removed walls
+        // TOP
+        if (!current->walls[TOP]) {
+            int nx = cx, ny = cy - 1;
+            if (ny >= 0 && !visitedLocal[ny][nx]) {
+                visitedLocal[ny][nx] = true;
+                parent[ny][nx] = {cx, cy};
+                q.push({nx, ny});
+            }
+        }
+        // RIGHT
+        if (!current->walls[RIGHT]) {
+            int nx = cx + 1, ny = cy;
+            if (nx < width && !visitedLocal[ny][nx]) {
+                visitedLocal[ny][nx] = true;
+                parent[ny][nx] = {cx, cy};
+                q.push({nx, ny});
+            }
+        }
+        // BOTTOM
+        if (!current->walls[BOTTOM]) {
+            int nx = cx, ny = cy + 1;
+            if (ny < height && !visitedLocal[ny][nx]) {
+                visitedLocal[ny][nx] = true;
+                parent[ny][nx] = {cx, cy};
+                q.push({nx, ny});
+            }
+        }
+        // LEFT
+        if (!current->walls[LEFT]) {
+            int nx = cx - 1, ny = cy;
+            if (nx >= 0 && !visitedLocal[ny][nx]) {
+                visitedLocal[ny][nx] = true;
+                parent[ny][nx] = {cx, cy};
+                q.push({nx, ny});
+            }
         }
     }
 
-    if (!pathFound) {
-        std::cout << "No path found from (" << startX << "," << startY
-                  << ") to (" << endX << "," << endY << ").\n";
+    if (!found) {
+        std::cout << "\nNo solution found: end is unreachable from start.\n";
         return false;
     }
 
-    // Reconstruct and mark the path
-    std::vector<std::pair<int, int>> solutionPath;
-    int cx = endX, cy = endY;
-
-    while (cx != -1 && cy != -1) {
-        solutionPath.push_back({cx, cy});
-        grid[cy][cx].onPath = true;  // *** FIX: Actually mark the path ***
-
-        auto [px, py] = parent[cy][cx];
-        cx = px;
-        cy = py;
+    // Reconstruct path length
+    int pathLen = 0;
+    int px = endX, py = endY;
+    while (!(px == startX && py == startY)) {
+        auto p = parent[py][px];
+        if (p.first == -1) break; // safety
+        px = p.first; py = p.second;
+        pathLen++;
     }
 
-    // Reverse to get path from start to end
-    std::reverse(solutionPath.begin(), solutionPath.end());
-
-    // Enhanced output with path information
-    std::cout << "✅ Path found! Length: " << solutionPath.size() << " steps\n";
-    std::cout << "Path: ";
-    for (size_t i = 0; i < solutionPath.size(); ++i) {
-        auto [x, y] = solutionPath[i];
-        std::cout << "(" << x << "," << y << ")";
-        if (i < solutionPath.size() - 1) std::cout << " → ";
-    }
-    std::cout << "\n";
-
+    std::cout << "\nSolution found! Shortest path length: " << pathLen << " steps\n";
     return true;
 }
 
+/**
+ * Print solution path (placeholder implementation)
+ */
 void Maze::printSolution() const {
-    if (width <= 0 || height <= 0 || grid.empty()) {
-        std::cout << "Invalid maze dimensions or uninitialized grid.\n";
-        return;
-    }
-
-    // Check if there's actually a solution to display
-    bool hasSolution = false;
-    for (int y = 0; y < height && !hasSolution; ++y) {
-        for (int x = 0; x < width && !hasSolution; ++x) {
-            if (grid[y][x].onPath) hasSolution = true;
-        }
-    }
-
-    if (!hasSolution) {
-        std::cout << "No solution path to display. Run solveMaze() first.\n";
-        return;
-    }
-
-    const int rows = height * 2 + 1;
-    const int cols = width * 2 + 1;
-    std::vector<std::string> canvas(rows, std::string(cols, '#'));
-
-    auto setCanvas = [&](int r, int c, char ch) {
-        if (r >= 0 && r < rows && c >= 0 && c < cols)
-            canvas[r][c] = ch;
-    };
-
-    // Draw maze with solution path
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            const Cell &cell = grid[y][x];
-            int cr = 2 * y + 1;
-            int cc = 2 * x + 1;
-
-            // Mark cell interior (solution path or empty space)
-            char cellChar = cell.onPath ? '●' : ' ';  // Use filled circle for path
-            setCanvas(cr, cc, cellChar);
-
-            // Mark passages (solution extends through passages)
-            if (!cell.walls[TOP]) {
-                char passageChar = cell.onPath ? '●' : ' ';
-                setCanvas(cr - 1, cc, passageChar);
-            }
-            if (!cell.walls[BOTTOM]) {
-                char passageChar = cell.onPath ? '●' : ' ';
-                setCanvas(cr + 1, cc, passageChar);
-            }
-            if (!cell.walls[LEFT]) {
-                char passageChar = cell.onPath ? '●' : ' ';
-                setCanvas(cr, cc - 1, passageChar);
-            }
-            if (!cell.walls[RIGHT]) {
-                char passageChar = cell.onPath ? '●' : ' ';
-                setCanvas(cr, cc + 1, passageChar);
-            }
-        }
-    }
-
-    // Create entrance and exit
-    setCanvas(0, 1, ' ');
-    setCanvas(rows - 1, cols - 2, ' ');
-
-    // Display the solution
-    std::cout << "\n🎯 MAZE SOLUTION (" << width << "x" << height << ") 🎯\n";
-    std::cout << "Legend: # = wall, ● = solution path, space = open\n\n";
-
-    for (const auto &line : canvas) {
-        std::cout << line << '\n';
-    }
-    std::cout << "\n";
+    std::cout << "Solution visualization not implemented in this version.\n";
+    std::cout << "Use solveMaze() method to find if a solution exists.\n";
 }
 
-
-// Debug and validation
+/**
+ * Check if the maze is properly connected (all cells reachable)
+ */
 bool Maze::isMazeConnected() {
-    // Defensive checks
-    if (width <= 0 || height <= 0 || grid.empty()) {
-        std::cout << "Invalid maze dimensions or uninitialized grid.\n";
+    // Reset visited flags
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            grid[y][x].visited = false;
+        }
+    }
+    
+    // Use DFS to visit all reachable cells from (0,0)
+    std::stack<Cell*> toVisit;
+    Cell* start = getCell(0, 0);
+    if (!start) return false;
+    
+    start->visited = true;
+    toVisit.push(start);
+    int visitedCount = 1;
+    
+    while (!toVisit.empty()) {
+        Cell* current = toVisit.top();
+        toVisit.pop();
+        
+        // Check all four directions
+        if (!current->walls[TOP]) {
+            Cell* neighbor = getCell(current->x, current->y - 1);
+            if (neighbor && !neighbor->visited) {
+                neighbor->visited = true;
+                toVisit.push(neighbor);
+                visitedCount++;
+            }
+        }
+        if (!current->walls[RIGHT]) {
+            Cell* neighbor = getCell(current->x + 1, current->y);
+            if (neighbor && !neighbor->visited) {
+                neighbor->visited = true;
+                toVisit.push(neighbor);
+                visitedCount++;
+            }
+        }
+        if (!current->walls[BOTTOM]) {
+            Cell* neighbor = getCell(current->x, current->y + 1);
+            if (neighbor && !neighbor->visited) {
+                neighbor->visited = true;
+                toVisit.push(neighbor);
+                visitedCount++;
+            }
+        }
+        if (!current->walls[LEFT]) {
+            Cell* neighbor = getCell(current->x - 1, current->y);
+            if (neighbor && !neighbor->visited) {
+                neighbor->visited = true;
+                toVisit.push(neighbor);
+                visitedCount++;
+            }
+        }
+    }
+    
+    // All cells should be reachable in a proper maze
+    int totalCells = width * height;
+    std::cout << "\nMaze connectivity check:\n";
+    std::cout << "Visited cells: " << visitedCount << "/" << totalCells << "\n";
+    
+    if (visitedCount == totalCells) {
+        std::cout << "✓ Maze is properly connected!\n";
+        return true;
+    } else {
+        std::cout << "✗ Maze has isolated regions! " << (totalCells - visitedCount) << " cells unreachable.\n";
         return false;
     }
-
-    // Total number of cells expected to be reachable
-    const int totalCells = width * height;
-
-    // Local visited tracker (don’t use Cell.visited so it doesn’t interfere with other algorithms)
-    std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
-
-    // Directions: TOP, RIGHT, BOTTOM, LEFT
-    const int dx[4] = {0, 1, 0, -1};
-    const int dy[4] = {-1, 0, 1, 0};
-
-    // Start BFS from (0,0)
-    std::queue<std::pair<int, int>> q;
-    q.push({0, 0});
-    visited[0][0] = true;
-    int reachableCount = 1;
-
-    while (!q.empty()) {
-        auto [x, y] = q.front();
-        q.pop();
-
-        // Explore 4 neighbors
-        for (int dir = 0; dir < 4; ++dir) {
-            int nx = x + dx[dir];
-            int ny = y + dy[dir];
-
-            // Skip out-of-bounds
-            if (nx < 0 || ny < 0 || nx >= width || ny >= height)
-                continue;
-
-            // Skip if wall blocks movement in that direction
-            if (grid[y][x].walls[dir])
-                continue;
-
-            // Skip already visited
-            if (visited[ny][nx])
-                continue;
-
-            // Otherwise, mark and push
-            visited[ny][nx] = true;
-            q.push({nx, ny});
-            ++reachableCount;
-        }
-    }
-
-    // Maze is connected if we reached every cell
-    bool connected = (reachableCount == totalCells);
-
-    // Optional: print debug info
-    std::cout << "Reachable cells: " << reachableCount
-              << " / " << totalCells
-              << " -> Maze " << (connected ? "is connected ✅" : "has disconnected regions ❌")
-              << "\n";
-
-    return connected;
-
-    //Youssef
 }
-

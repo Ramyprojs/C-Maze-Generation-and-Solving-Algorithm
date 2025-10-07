@@ -2,8 +2,6 @@
 #include <iostream>
 #include <string>
 #include <chrono>
-#include <algorithm>
-#include <numeric>
 #include <limits>
 
 /**
@@ -27,13 +25,11 @@ void displayMenu() {
     std::cout << std::string(50, '=') << "\n";
     std::cout << "Choose an option: ";
 }
-    // Moaz
-    
+
 /**
  * Get integer input with validation
  */
-int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {  
-    // TODO: Prompt the user and validate numeric input between min and max.
+int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {
     int value;
     while (true) {
         std::cout << prompt;
@@ -48,8 +44,6 @@ int getIntInput(const std::string& prompt, int min = 0, int max = 1000) {
         }
     }
 }
- //Moaaz
-
 
 /**
  * Generate and display a basic maze
@@ -72,10 +66,10 @@ void generateBasicMaze(Maze& maze, bool useRecursive = false) {
     
     std::cout << "Generation completed in " << duration.count() << " microseconds.\n";
     maze.printMaze();
-}  //Ramy
+}
 
 /**
- * Generate maze with custom dimensions (now updates a passed-in currentMaze)
+ * Generate maze with custom dimensions
  */
 void generateCustomMaze(Maze &currentMaze) {
     int width = getIntInput("Enter maze width (3-50): ", 3, 50);
@@ -93,10 +87,10 @@ void generateCustomMaze(Maze &currentMaze) {
     // Replace the currentMaze with the newly generated maze so option 7
     // (solve current maze) operates on the maze the user just created.
     currentMaze = std::move(customMaze);
-}  //Ramy
+}
 
 /**
- * Generate maze with custom seed (now updates a passed-in currentMaze)
+ * Generate maze with custom seed
  */
 void generateSeededMaze(Maze &currentMaze) {
     int width = getIntInput("Enter maze width (3-30): ", 3, 30);
@@ -115,8 +109,7 @@ void generateSeededMaze(Maze &currentMaze) {
 
     // Make the seeded maze the current maze for subsequent operations
     currentMaze = std::move(seededMaze);
-} //Ramy
-
+}
 
 /**
  * Compare multiple maze generation algorithms
@@ -138,8 +131,7 @@ void compareMazes() {
     generateBasicMaze(recursiveMaze, true);
     
     std::cout << "\nNote: Both mazes use the same seed (12345) for comparison.\n";
-}  //Ramy
-
+}
 
 /**
  * Performance testing
@@ -174,150 +166,55 @@ void performanceTest() {
         std::cout << "  Recursive: " << std::setw(8) << recursiveTime.count() << " μs\n";
         std::cout << "  Difference: " << std::setw(7) << (recursiveTime.count() - iterativeTime.count()) << " μs\n\n";
     }
-}  //Ramy
+}
 
 /**
  * Demonstrate maze solving
  */
 void solveMazeDemo(Maze& maze) {
-    std::cout << "\n🎯 MAZE SOLVING DEMONSTRATION\n";
-    std::cout << std::string(50, '=') << "\n";
-
-    // Validate maze
-    if (maze.getWidth() <= 0 || maze.getHeight() <= 0) {
-        std::cout << "❌ Error: No valid maze to solve. Generate a maze first.\n";
-        return;
-    }
-
-    const int width = maze.getWidth();
-    const int height = maze.getHeight();
-
-    std::cout << "Maze: " << width << "x" << height << " (" << (width * height) << " cells)\n";
-
-    // Check connectivity with timing
-    std::cout << "\nChecking maze connectivity...\n";
+    std::cout << "\nMaze Solving Demo\n";
+    std::cout << "Attempting to solve maze from (0,0) to (" 
+              << (maze.getWidth()-1) << "," << (maze.getHeight()-1) << ")...\n";
+    
     auto start = std::chrono::high_resolution_clock::now();
-    maze.isMazeConnected();  // This function prints its own results
+    bool solved = maze.solveMaze();
     auto end = std::chrono::high_resolution_clock::now();
-    auto connectTime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::cout << "Connectivity check completed in " << connectTime.count() << " μs\n";
-
-    // Show original maze
-    std::cout << "\nOriginal maze:\n";
-    maze.printMazeASCII();
-
-    // Test multiple solving scenarios
-    struct TestCase {
-        int sx, sy, ex, ey;
-        const char* name;
-    };
-
-    std::vector<TestCase> tests = {
-        {0, 0, width-1, height-1, "Corner to corner"},
-        {0, height-1, width-1, 0, "Reverse diagonal"}
-    };
-
-    // Add center test only if maze is big enough
-    if (width > 2 && height > 2) {
-        tests.push_back({width/2, height/2, 0, 0, "Center to origin"});
-    }
-
-    std::cout << "\nTesting " << tests.size() << " solving scenarios:\n";
-    std::cout << std::string(50, '-') << "\n";
-
-    int solved = 0;
-    std::vector<long long> times;
-
-    for (const auto& test : tests) {
-        // Skip invalid positions
-        if (test.sx >= width || test.sy >= height || test.ex >= width || test.ey >= height) {
-            continue;
-        }
-
-        std::cout << "\n" << test.name << ": (" << test.sx << "," << test.sy
-                  << ") → (" << test.ex << "," << test.ey << ")\n";
-
-        // Time the solve
-        start = std::chrono::high_resolution_clock::now();
-        bool success = maze.solveMaze(test.sx, test.sy, test.ex, test.ey);
-        end = std::chrono::high_resolution_clock::now();
-        auto solveTime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-        times.push_back(solveTime.count());
-
-        if (success) {
-            solved++;
-            // Count path length
-            int pathLen = 0;
-            const auto& grid = maze.getGrid();
-            for (int y = 0; y < height; ++y) {
-                for (int x = 0; x < width; ++x) {
-                    if (grid[y][x].onPath) pathLen++;
-                }
-            }
-            std::cout << "✅ Solved in " << solveTime.count() << " μs (path: " << pathLen << " cells)\n";
-
-            // Show first solution
-            if (solved == 1) {
-                std::cout << "\nSolution visualization:\n";
-                maze.printSolution();
-            }
-        } else {
-            std::cout << "❌ No path found (" << solveTime.count() << " μs)\n";
-        }
-    }
-
-    // Performance summary
-    std::cout << "\n" << std::string(50, '=') << "\n";
-    std::cout << "RESULTS SUMMARY:\n";
-    std::cout << "• Solutions found: " << solved << "/" << tests.size() << "\n";
-
-    // FIX: Explicit std:: namespace and proper algorithm usage
-    if (!times.empty()) {
-        // Use explicit iterators and std:: namespace
-        auto times_begin = times.begin();
-        auto times_end = times.end();
-
-        auto minTime = *std::min_element(times_begin, times_end);
-        auto maxTime = *std::max_element(times_begin, times_end);
-
-        // Use proper accumulate with explicit types
-        long long sum = std::accumulate(times_begin, times_end, 0LL);
-        auto avgTime = sum / static_cast<long long>(times.size());
-
-        std::cout << "• Fastest solve: " << minTime << " μs\n";
-        std::cout << "• Slowest solve: " << maxTime << " μs\n";
-        std::cout << "• Average time: " << avgTime << " μs\n";
-        std::cout << "• Algorithm: BFS (optimal shortest path)\n";
-    }
-
-    // FIX: Proper size comparison
-    if (solved == static_cast<int>(tests.size())) {
-        std::cout << "🎉 All test cases passed! Maze is fully connected.\n";
-    } else if (solved > 0) {
-        std::cout << "⚠️  Some paths not found - normal for complex mazes.\n";
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    
+    if (solved) {
+        std::cout << "Maze solved in " << duration.count() << " microseconds!\n";
     } else {
-        std::cout << "❌ No solutions found - check maze connectivity.\n";
+        std::cout << "Maze could not be solved.\n";
     }
-
-    std::cout << std::string(50, '=') << "\n";
-    // Youssef
 }
 
 /**
- * Main program loop (skeleton)
+ * Main program loop
  */
 int main() {
-    // TODO: Implement full interactive loop. This skeleton just demonstrates
-    // how the real main is structured. Replace with real logic when
-    // implementing tests.
+    std::cout << "Welcome to the Recursive Maze Generator!\n";
+    std::cout << "This program demonstrates various maze generation algorithms.\n";
     
-    Maze maze;
+    // Default maze
+    Maze currentMaze(10, 10);
+    currentMaze.generateMazeIterative(); // Generate initial maze
+    
     int choice;
-    
     do {
         displayMenu();
-        choice = getIntInput("", 1, 8);
+        std::string input;
+        std::cin >> input;
+        
+        // Handle both numeric and letter input
+        if (input == "A" || input == "a") {
+            choice = 10; // Use 10 for connectivity check
+        } else {
+            try {
+                choice = std::stoi(input);
+            } catch (...) {
+                choice = -1; // Invalid input
+            }
+        }
         
         switch (choice) {
             case 1:
@@ -372,16 +269,29 @@ int main() {
             default:
                 std::cout << "Invalid option. Please try again.\n";
         }
-}  //Moaz
+        
+        if (choice != 0) {
+            std::cout << "\nPress Enter to continue...";
+            // Clear any leftover input (e.g., newline from previous >> reads)
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cin.get();
+        }
+        
+    } while (choice != 0);
+    
+    return 0;
 }
 
 /**
  * Additional utility functions for demonstration
  */
-namespace MazeUtils {        
-  void sizeDemonstration() {       
-      // TODO: Construct several mazes of different sizes and print them.
-      std::cout << "\n=== SIZE DEMONSTRATION ===\n";
+namespace MazeUtils {
+    /**
+     * Create a demo showcasing different maze sizes
+     */
+    void sizeDemonstration() {
+        std::cout << "\n=== SIZE DEMONSTRATION ===\n";
+        
         std::vector<std::pair<int, int>> sizes = {{5, 5}, {8, 8}, {12, 12}};
         
         for (const auto& size : sizes) {
@@ -391,33 +301,25 @@ namespace MazeUtils {
             demo.printMaze();
         }
     }
-    }
-        // Moaz
-
-   void showComplexityInfo() {
-    // TODO: Print algorithm complexity information.
-    std::cout << "\n=== Maze Generation Algorithm Complexities ===\n";
-    std::cout << "1. Depth-First Search (DFS):\n";
-    std::cout << "   - Time: O(n) where n is number of cells\n";
-    std::cout << "   - Space: O(n) for recursion stack\n";
-    std::cout << "   - Characteristics: Creates long corridors, few dead ends\n\n";
     
-    std::cout << "2. Prim's Algorithm:\n";
-    std::cout << "   - Time: O(n log n) with binary heap\n";
-    std::cout << "   - Space: O(n) for priority queue\n";
-    std::cout << "   - Characteristics: More uniform, many short dead ends\n\n";
-    
-    std::cout << "3. Kruskal's Algorithm:\n";
-    std::cout << "   - Time: O(n log n) with union-find\n";
-    std::cout << "   - Space: O(n) for disjoint set\n";
-    std::cout << "   - Characteristics: Balanced, medium difficulty\n\n";
-    
-    std::cout << "4. Recursive Division:\n";
-    std::cout << "   - Time: O(n log n)\n";
-    std::cout << "   - Space: O(log n) for recursion\n";
-    std::cout << "   - Characteristics: Perfect maze, rectangular patterns\n";
-}
-        // Moaz
+    /**
+     * Show algorithm complexity information
+     */
+    void showComplexityInfo() {
+        std::cout << "\n=== ALGORITHM COMPLEXITY ===\n";
+        std::cout << "Iterative Depth-First Search (Stack-based):\n";
+        std::cout << "  Time Complexity: O(n)\n";
+        std::cout << "  Space Complexity: O(n)\n";
+        std::cout << "  Where n = width × height\n\n";
+        
+        std::cout << "Recursive Depth-First Search:\n";
+        std::cout << "  Time Complexity: O(n)\n";
+        std::cout << "  Space Complexity: O(n) - due to recursion stack\n";
+        std::cout << "  Where n = width × height\n\n";
+        
+        std::cout << "Both algorithms ensure:\n";
+        std::cout << "  - Every cell is visitable\n";
+        std::cout << "  - Only one path between any two cells\n";
+        std::cout << "  - Perfect maze generation (no loops)\n";
     }
 }
-
