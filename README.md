@@ -1,81 +1,297 @@
-C++ Maze Generation and Solving Algorithm
-A comprehensive C++ implementation of maze generation algorithms, featuring both recursive and iterative depth-first search (DFS) approaches. This project creates intricate, perfect mazes and includes a built-in solver.
+# Recursive Maze Generation Algorithm
 
-🎯 Project Overview
-This program generates perfect mazes (mazes with no loops and a single solution path between any two points). It serves as a practical demonstration of graph traversal algorithms, data structures, and object-oriented design in C++.
+A comprehensive C++ implementation of recursive maze generation algorithms featuring both iterative and recursive approaches with stack-based data structures for efficient maze generation.
 
-Algorithms Implemented
+## 🎯 Project Overview
 
-Iterative Depth-First Search (DFS): Uses an explicit stack (std::stack) for efficient, non-recursive generation, which is ideal for very large mazes.
+This project implements a sophisticated maze generation system that creates intricate and challenging mazes using two primary algorithms:
 
-Recursive Depth-First Search (Backtracking): A classic, elegant implementation that uses the call stack to manage its state.
+1. **Iterative Depth-First Search** - Stack-based implementation
+2. **Recursive Depth-First Search** - Classic recursive approach
 
-🚀 Key Features
-Dual Generation Algorithms: Switch between iterative and recursive methods.
+Both algorithms ensure perfect maze generation with exactly one path between any two cells.
 
-Customizable Mazes: Specify width, height, and a random seed for reproducible results.
+## 🚀 Features
 
-Built-in Maze Solver: Finds and displays the solution path from start to finish.
+- **Multiple Generation Algorithms**: Choose between iterative and recursive implementations
+- **Customizable Maze Dimensions**: Generate mazes from 3x3 to 50x50 cells
+- **Seeded Generation**: Reproducible mazes using custom seeds
+- **Multiple Visualization Formats**: Unicode box drawing and ASCII representations
+- **Performance Testing**: Built-in benchmarking for algorithm comparison
+- **Maze Solving**: Bonus feature with path-finding capabilities
+- **Interactive Menu System**: User-friendly command-line interface
 
-Multiple Display Formats: View the maze using clean Unicode box characters or standard ASCII.
+## 📋 Requirements
 
-Performance Benchmarking: Compare the generation speeds of the iterative vs. recursive algorithms.
+- **C++ Compiler**: GCC 7.0+ or Clang 6.0+ (C++17 support required)
+- **Operating System**: Linux, macOS, or Windows (with appropriate compiler)
+- **Memory**: Minimal requirements (scales with maze size)
 
-Interactive CLI: A user-friendly command-line menu to access all features.
+### Optional Tools
+- `valgrind` - For memory leak detection
+- `cppcheck` - For static code analysis
+- `clang-format` - For code formatting
 
-🛠️ Getting Started
-Prerequisites
+## 🛠️ Installation & Compilation
 
-A C++17 compatible compiler (like GCC or Clang).
+### Quick Start
 
-make for easy compilation.
+```bash
+# Clone or download the project files
+# Navigate to the project directory
+cd Maze
 
-Compilation and Execution
-
-Clone the repository:
-
-git clone [https://github.com/Ramyprojs/cpp-maze-generator.git]
-=======
-cd cpp-maze-generator
-
-Compile the project using the included Makefile:
-
+# Compile using make
 make
 
-Run the program to open the interactive menu:
-
+# Run the program
 make run
+```
 
-Alternatively, you can run the executable directly:
+### Manual Compilation
 
-./bin/maze_generator
+```bash
+g++ -std=c++17 -Wall -Wextra -O2 main.cpp Maze.cpp -o maze_generator
+./maze_generator
+```
 
-📚 Usage
-Once running, the program presents a menu with several options:
+### Available Make Targets
 
-Generate Mazes: Create default or custom-sized mazes with either algorithm.
+```bash
+make all        # Build the project (default)
+make debug      # Build with debug information
+make release    # Build with full optimization
+make run        # Build and run the program
+make clean      # Remove build artifacts
+make help       # Show all available targets
+```
 
-Solve Maze: Find the path through the currently generated maze.
+## 📚 Usage
 
-Performance Test: See a speed comparison for generating mazes of different sizes.
+### Interactive Menu
 
-Change View: Toggle between detailed Unicode and simple ASCII output.
+Run the program and choose from the following options:
 
-=======
+1. **Generate maze (Iterative)** - Stack-based depth-first search
+2. **Generate maze (Recursive)** - Classic recursive implementation
+3. **Generate custom size maze** - Specify dimensions
+4. **Generate maze with custom seed** - Reproducible results
+5. **Show maze in ASCII format** - Alternative visualization
+6. **Show detailed maze information** - Statistics and analysis
+7. **Solve current maze** - Pathfinding demonstration
+8. **Generate multiple mazes comparison** - Side-by-side algorithm comparison
+9. **Performance test** - Benchmark different maze sizes
 
-🏗️ Project Structure
+### Example Output
 
-├── Makefile          # Handles all build and run commands
-├── Maze.h            # Header file for the Maze class
-├── Maze.cpp          # Implementation of the Maze class and algorithms
-├── main.cpp          # Main program driver with the user interface
-└── README.md         # This documentation file
+```
+=== MAZE (10x10) ===
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│     │           │        │
+├──┼  ├──┬──┬──┼  ├──┬──┼  │
+│     │        │     │     │
+├  ┬──┤  ┌──┬──┴──┬──┤  ┌──┤
+│  │     │        │     │  │
+└──┴──┴──┴──┴──┴──┴──┴──┴──┘
+```
+
+## 🧩 Algorithm Details
+
+### Iterative Depth-First Search (Stack-Based)
+
+```cpp
+void generateMazeIterative() {
+    // Initialize with starting cell
+    Cell* currentCell = getCell(0, 0);
+    currentCell->visited = true;
+    cellStack.push(currentCell);
+    
+    while (!cellStack.empty()) {
+        currentCell = cellStack.top();
+        
+        // Get unvisited neighbors
+        std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+        
+        if (!neighbors.empty()) {
+            // Choose random neighbor and carve path
+            Cell* chosenNeighbor = neighbors[random_index];
+            removeWall(currentCell, chosenNeighbor);
+            chosenNeighbor->visited = true;
+            cellStack.push(chosenNeighbor);
+        } else {
+            // Backtrack
+            cellStack.pop();
+        }
+    }
+}
+```
+
+### Recursive Depth-First Search
+
+```cpp
+void generateMazeRecursive(int x, int y) {
+    Cell* currentCell = getCell(x, y);
+    currentCell->visited = true;
+    
+    // Get and shuffle neighbors for randomness
+    std::vector<Cell*> neighbors = getUnvisitedNeighbors(currentCell);
+    std::shuffle(neighbors.begin(), neighbors.end(), rng);
+    
+    // Recursively visit unvisited neighbors
+    for (Cell* neighbor : neighbors) {
+        if (!neighbor->visited) {
+            removeWall(currentCell, neighbor);
+            generateMazeRecursive(neighbor->x, neighbor->y);
+        }
+    }
+}
+```
+
+## 📊 Performance Analysis
+
+### Time Complexity
+- **Both algorithms**: O(n) where n = width × height
+- **Space Complexity**: O(n) for grid storage + O(n) for stack/recursion
+
+### Benchmark Results (Example)
+```
+Testing 10x10 maze:
+  Iterative:      156 μs
+  Recursive:      203 μs
+  Difference:      47 μs
+
+Testing 30x30 maze:
+  Iterative:     2840 μs
+  Recursive:     3120 μs
+  Difference:     280 μs
+```
+
+## 🏗️ Project Structure
+
+```
+Maze/
+├── Maze.h              # Header file with class definitions
+├── Maze.cpp            # Implementation of maze algorithms
+├── main.cpp            # Main program with user interface
+├── Makefile            # Build system configuration
+├── README.md           # This documentation
+├── bin/                # Compiled executables (created by make)
+└── obj/                # Object files (created by make)
+```
+
+## 🔧 Code Architecture
+
+### Core Classes
+
+- **`Cell`**: Represents individual maze cells with wall and visit information
+- **`Maze`**: Main class containing generation algorithms and utilities
+- **`Direction`**: Enumeration for navigation (TOP, RIGHT, BOTTOM, LEFT)
+
+### Key Methods
+
+- `generateMazeIterative()`: Stack-based maze generation
+- `generateMazeRecursive()`: Recursive maze generation
+- `printMaze()`: Unicode box drawing visualization
+- `printMazeASCII()`: ASCII character visualization
+- `solveMaze()`: Pathfinding algorithm
+
+## 🎨 Customization
+
+### Creating Custom Mazes
+
+```cpp
+// Create a 15x20 maze with specific seed
+Maze customMaze(15, 20, 12345);
+
+// Generate using recursive algorithm
+customMaze.generateMazeRecursive();
+
+// Display the result
+customMaze.printMaze();
+```
+
+### Modifying Generation Parameters
+
+The maze generation can be customized by:
+- Adjusting maze dimensions (minimum 3x3, maximum limited by memory)
+- Using different random seeds for reproducible results
+- Modifying the random number generator for different distributions
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Compilation Errors**
+   ```bash
+   # Ensure C++17 support
+   g++ --version
+   # Update compiler if needed
+   ```
+
+2. **Stack Overflow (Large Recursive Mazes)**
+   ```bash
+   # Use iterative algorithm for large mazes
+   # Or increase stack size: ulimit -s unlimited
+   ```
+
+3. **Memory Issues**
+   ```bash
+   # Check memory usage
+   make memcheck
+   ```
+
+### Performance Tips
+
+- Use iterative algorithm for larger mazes (>40x40)
+- Compile with `-O2` or `-O3` for better performance
+- Consider maze dimensions vs. available memory
+
+## 🔮 Future Enhancements
+
+- [ ] Additional maze generation algorithms (Kruskal's, Prim's)
+- [ ] Graphical user interface (GUI) version
+- [ ] Maze export to image formats
+- [ ] Advanced solving algorithms (A*, Dijkstra)
+- [ ] 3D maze generation
+- [ ] Multi-threaded generation for large mazes
+
+## 📝 License
+
+This project is open source and available under the MIT License.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for:
+- Bug fixes
+- Performance improvements
+- Additional algorithms
+- Documentation improvements
+
+## 📞 Support
+
+For questions or issues:
+1. Check the troubleshooting section
+2. Review the code comments for implementation details
+3. Test with different maze sizes and parameters
+
+## 🎓 Educational Value
+
+This project demonstrates:
+- **Data Structures**: Stacks, 2D arrays, vectors
+- **Algorithms**: Depth-first search, backtracking
+- **Design Patterns**: Object-oriented programming principles
+- **Performance Analysis**: Algorithm comparison and benchmarking
+- **C++ Features**: Modern C++17 features, STL usage
+
+Perfect for:
+- Computer Science students studying algorithms
+- Developers learning recursive problem-solving
+- Anyone interested in maze generation and pathfinding algorithms
+
+---
+
+**Happy Maze Generating!** 🌟
 
 
-🏗️ Project Structure
 
-├── Makefile          # Handles all build and run commands
-├── Maze.h            # Header file for the Maze class
-├── Maze.cpp          # Implementation of the Maze class and algorithms
-├── main.cpp          # Main program driver with the user interface
-└── README.md         # This documentation file
+
